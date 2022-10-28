@@ -6,6 +6,6 @@
 typedef struct flags {
   int bflag, eflag, nflag, sflag, vflag;
 } Flags;
-Flags* getFlags(int argv, char* argc[], char* flags);
+Flags* getFlags(const int argv, const char* argc[]);
 void defaultFlags(Flags* flags);
 #endif  // SRC_CAT_FLAGS_H_

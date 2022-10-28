@@ -75,11 +75,10 @@ void cat(int argc, char *argv[]) {
   if (myFlags != NULL) free(myFlags);
 }
 
-Flags *getFlags(int argc, char *argv[], char *flags) {
+Flags *getFlags(const int argc, const char *argv[]) {
   Flags *myFlags = (Flags *)calloc(1, sizeof(Flags));
-  // defaultFlags(&myFlags);
   int opt;
-  while ((opt = getopt(argc, argv, flags)) != -1) {
+  while ((opt = getopt(argc, argv, "bensv?")) != -1) {
     switch (opt) {
       case 'b':
         myFlags->bflag = FLAGACTIVATED;

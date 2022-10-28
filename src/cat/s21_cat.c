@@ -1,10 +1,12 @@
 #include "s21_cat.h"
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "files.h"
 #include "flags.h"
 
 int main(int argc, char **argv) {
@@ -12,7 +14,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void cat(int argc, char *argv[]) {
+void cat(int argc, char **argv) {
   Flags *myFlags = getFlags(argc, argv);
 
   char buffer[BUFFERSIZE];
@@ -50,7 +52,7 @@ void cat(int argc, char *argv[]) {
         if (length >= 1) {
           char *tmp = strdup(buffer);
           buffer[0] = '\0';
-          sprintf(buffer, "%d\t", 6, lineNumber++);
+          sprintf(buffer, "%*d\t", 6, lineNumber++);
           strcat(buffer, tmp);
         }
       } else if (myFlags->nflag) {
@@ -69,36 +71,8 @@ void cat(int argc, char *argv[]) {
       fprintf(stdout, "%s\n", buffer);
     }
 
-    fclose(fp);
+    if (fp != NULL) fclose(fp);
     currentFile++;
   }
   if (myFlags != NULL) free(myFlags);
-}
-
-Flags *getFlags(const int argc, const char *argv[]) {
-  Flags *myFlags = (Flags *)calloc(1, sizeof(Flags));
-  int opt;
-  while ((opt = getopt(argc, argv, "bensv?")) != -1) {
-    switch (opt) {
-      case 'b':
-        myFlags->bflag = FLAGACTIVATED;
-        break;
-      case 'e':
-        myFlags->eflag = FLAGACTIVATED;
-        break;
-      case 'n':
-        myFlags->nflag = FLAGACTIVATED;
-        break;
-      case 's':
-        myFlags->sflag = FLAGACTIVATED;
-        break;
-      case 't':
-      case 'v':
-        myFlags->vflag = FLAGACTIVATED;
-        break;
-      case '?':
-        printf("usage: cat [-bens] [file ...]\n");
-    }
-  }
-  return myFlags;
 }

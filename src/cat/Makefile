@@ -1,7 +1,7 @@
 CC =gcc
 CFLAGS = -Wall -Werror -Wextra -c
 
-SOURCE = flags.c s21_cat.c
+SOURCE = flags.c s21_cat.c files.c
 OBJECTS = $(SOURCE:.c=.o)
 EXECUTABLE = CAT
 

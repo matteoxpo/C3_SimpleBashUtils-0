@@ -13,5 +13,5 @@ typedef struct filesData {
 } filesData;
 
 filesData* init(int argc, char** argv, int optind);
-
+void destroy(filesData* data);
 #endif  // SRC_CAT_FILES_H_

@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Flags *getFlags(int argc, char **argv) {
+Flags *getFlags(int argCount, char **argVector) {
   Flags *myFlags = (Flags *)calloc(1, sizeof(Flags));
   int opt;
-  while ((opt = getopt_long(argc, argv, "benstv?", long_options, NULL)) != -1) {
+  while ((opt = getopt_long(argCount, argVector, "benstv?", long_options,
+                            NULL)) != -1) {
     switch (opt) {
       case 'b':
         myFlags->bflag = FLAGACTIVATED;

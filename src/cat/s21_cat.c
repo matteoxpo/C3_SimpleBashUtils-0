@@ -16,7 +16,8 @@ int main(int argc, char **argv) {
 
 void cat(int argc, char **argv) {
   Flags *myFlags = getFlags(argc, argv);
-
+  filesData *myFilesData = init(argc, argv, optind);
+  printf("%s", myFilesData->fileNames[0]);
   char buffer[BUFFERSIZE];
   int currentFile = optind;
   FILE *fp;
@@ -74,5 +75,6 @@ void cat(int argc, char **argv) {
     if (fp != NULL) fclose(fp);
     currentFile++;
   }
+  destroy(myFilesData);
   if (myFlags != NULL) free(myFlags);
 }

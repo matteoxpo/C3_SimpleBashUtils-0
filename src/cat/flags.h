@@ -18,7 +18,7 @@ static struct option const long_options[] = {
 typedef struct flags {
   unsigned short bflag, eflag, nflag, sflag, vflag;
 } Flags;
-Flags* getFlags(int argv, char** argc);
+Flags* getFlags(int argCount, char** argVector);
 void defaultFlags(Flags* flags);
 
 #endif  // SRC_CAT_FLAGS_H_

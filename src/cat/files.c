@@ -14,9 +14,7 @@ filesData init(int argCount, char** argVector, int index) {
 
   myFilesData.fileNames = (char**)calloc(count, sizeof(char*));
   for (int i = 0; i < count; i++) {
-    myFilesData.fileNames[i] =
-        (char*)calloc(strlen(argVector[index]), sizeof(char));
-    strcpy(myFilesData.fileNames[i], argVector[index]);
+    myFilesData.fileNames[i] = strdup(argVector[index]);
     index++;
   }
   return myFilesData;
@@ -45,7 +43,7 @@ void destroy(filesData data) {
 }
 
 int isAllFilesDone(filesData data) {
-  return data.currentFileIndex < data.filesCount;
+  return data.currentFileIndex >= data.filesCount;
 }
 void closeCurrentFile(filesData* data) {
   if (data->currentFile != NULL) fclose(data->currentFile);
@@ -55,7 +53,7 @@ void closeCurrentFile(filesData* data) {
 int readingFromFile(filesData* data) {
   int res = 1;
   if (fgets(data->buffer, BUFFERSIZE,
-            (data->currentFile == NULL ? stdin : data->currentFile)) == NULL)
+            (data->currentFile != NULL ? data->currentFile : stdin)) == NULL)
     res = 0;
   return res;
 }

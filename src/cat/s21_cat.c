@@ -18,7 +18,7 @@ void cat(int argc, char **argv) {
   Flags myFlags = getFlags(argc, argv);
   filesData myFilesData = init(argc, argv, optind);
 
-  while (isAllFilesDone(myFilesData)) {
+  while (!isAllFilesDone(myFilesData)) {
     if (!openFile(&myFilesData)) return;
 
     int lastLineBlank = 0;

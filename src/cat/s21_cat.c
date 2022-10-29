@@ -15,32 +15,21 @@ int main(int argc, char **argv) {
 }
 
 void cat(int argc, char **argv) {
-  Flags *myFlags = getFlags(argc, argv);
-  filesData *myFilesData = init(argc, argv, optind);
-  printf("%s", myFilesData->fileNames[0]);
-  char buffer[BUFFERSIZE];
-  int currentFile = optind;
-  FILE *fp;
+  Flags myFlags = getFlags(argc, argv);
+  filesData myFilesData = init(argc, argv, optind);
 
-  while (currentFile <= argc) {
-    if (currentFile != argc) {
-      fp = fopen(argv[currentFile], "rb");
-      if (fp == NULL) {
-        fprintf(stderr, "%s: %s: No such file or directory", argv[0],
-                argv[currentFile]);
-        exit(0);
-      }
-    }
+  while (isAllFilesDone(myFilesData)) {
+    if (!openFile(&myFilesData)) return;
 
     int lastLineBlank = 0;
     int lineNumber = 1;
 
-    while (fgets(buffer, BUFFERSIZE, (fp == NULL ? stdin : fp))) {
-      int length = strlen(buffer);
-      buffer[length - 1] = '\0';
+    while (readingFromFile(&myFilesData)) {
+      int length = strlen(myFilesData.buffer);
+      myFilesData.buffer[length - 1] = '\0';
 
-      if (myFlags->sflag) {
-        length = strlen(buffer);
+      if (myFlags.sflag) {
+        length = strlen(myFilesData.buffer);
         int currentLineBlank = (length <= 1) ? 1 : 0;
         if (lastLineBlank && currentLineBlank) {
           continue;
@@ -48,33 +37,32 @@ void cat(int argc, char **argv) {
         lastLineBlank = currentLineBlank;
       }
 
-      if (myFlags->bflag) {
-        length = strlen(buffer);
+      if (myFlags.bflag) {
+        length = strlen(myFilesData.buffer);
         if (length >= 1) {
-          char *tmp = strdup(buffer);
-          buffer[0] = '\0';
-          sprintf(buffer, "%*d\t", 6, lineNumber++);
-          strcat(buffer, tmp);
+          char *tmp = strdup(myFilesData.buffer);
+          myFilesData.buffer[0] = '\0';
+          sprintf(myFilesData.buffer, "%*d\t", 6, lineNumber++);
+          strcat(myFilesData.buffer, tmp);
         }
-      } else if (myFlags->nflag) {
-        char *tmp = strdup(buffer);
-        buffer[0] = '\0';
-        sprintf(buffer, "%*d\t", 6, lineNumber++);
-        strcat(buffer, tmp);
+      } else if (myFlags.nflag) {
+        char *tmp = strdup(myFilesData.buffer);
+        myFilesData.buffer[0] = '\0';
+        sprintf(myFilesData.buffer, "%*d\t", 6, lineNumber++);
+        strcat(myFilesData.buffer, tmp);
       }
 
-      if (myFlags->eflag) {
-        length = strlen(buffer);
-        buffer[length] = '$';
-        buffer[length + 1] = '\0';
+      if (myFlags.eflag) {
+        length = strlen(myFilesData.buffer);
+        myFilesData.buffer[length] = '$';
+        myFilesData.buffer[length + 1] = '\0';
       }
 
-      fprintf(stdout, "%s\n", buffer);
+      fprintf(stdout, "%s\n", myFilesData.buffer);
     }
 
-    if (fp != NULL) fclose(fp);
-    currentFile++;
+    closeCurrentFile(&myFilesData);
+    myFilesData.currentFileIndex++;
   }
   destroy(myFilesData);
-  if (myFlags != NULL) free(myFlags);
 }

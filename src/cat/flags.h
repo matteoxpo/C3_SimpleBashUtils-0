@@ -2,6 +2,8 @@
 #define SRC_CAT_FLAGS_H_
 
 #define FLAGACTIVATED 1
+#define FLAGAINCTIVATED 0
+
 #include <getopt.h>
 #include <stdio.h>
 
@@ -18,7 +20,6 @@ static struct option const long_options[] = {
 typedef struct flags {
   unsigned short bflag, eflag, nflag, sflag, vflag;
 } Flags;
-Flags* getFlags(int argCount, char** argVector);
+Flags getFlags(int argCount, char** argVector);
 void defaultFlags(Flags* flags);
-
 #endif  // SRC_CAT_FLAGS_H_

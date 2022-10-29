@@ -4,27 +4,58 @@
 #include <stdlib.h>
 #include <string.h>
 
-filesData* init(int argCount, char** argVector, int index) {
-  filesData* myFilesData = (filesData*)calloc(1, sizeof(filesData));
+filesData init(int argCount, char** argVector, int index) {
+  filesData myFilesData;
 
-  myFilesData->currentFile = 0;
+  myFilesData.currentFileIndex = 0;
 
   int count = argCount - index;
-  myFilesData->filesCount = count;
+  myFilesData.filesCount = count;
 
-  myFilesData->fileNames = malloc(count * sizeof(char*));
+  myFilesData.fileNames = (char**)calloc(count, sizeof(char*));
   for (int i = 0; i < count; i++) {
-    myFilesData->fileNames[i] =
+    myFilesData.fileNames[i] =
         (char*)calloc(strlen(argVector[index]), sizeof(char));
-    strcpy(myFilesData->fileNames[i], argVector[index]);
+    strcpy(myFilesData.fileNames[i], argVector[index]);
     index++;
   }
   return myFilesData;
 }
 
-void destroy(filesData* data) {
-  if (data != NULL)
-    if (data->fileNames != NULL)
-      for (int i = 0; i < data->filesCount; i++)
-        if (data->fileNames[i] != NULL) free(data->fileNames[i]);
+int openFile(filesData* data) {
+  int res = 1;
+  if (data->currentFileIndex != data->filesCount) {
+    data->currentFile = fopen(data->fileNames[data->currentFileIndex], "rb");
+    if (data->currentFile == NULL) {
+      fprintf(stderr, "%s: No such file or directory\n",
+              data->fileNames[data->currentFileIndex]);
+      res = 0;
+    }
+  }
+  return res;
+}
+
+void destroy(filesData data) {
+  if (data.currentFile != NULL) fclose(data.currentFile);
+  if (data.fileNames != NULL) {
+    for (int i = 0; i < (int)data.filesCount; i++)
+      if (data.fileNames[i] != NULL) free(data.fileNames[i]);
+    free(data.fileNames);
+  }
+}
+
+int isAllFilesDone(filesData data) {
+  return data.currentFileIndex < data.filesCount;
+}
+void closeCurrentFile(filesData* data) {
+  if (data->currentFile != NULL) fclose(data->currentFile);
+  data->currentFile = NULL;
+}
+
+int readingFromFile(filesData* data) {
+  int res = 1;
+  if (fgets(data->buffer, BUFFERSIZE,
+            (data->currentFile == NULL ? stdin : data->currentFile)) == NULL)
+    res = 0;
+  return res;
 }

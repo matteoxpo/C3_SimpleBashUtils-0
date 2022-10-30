@@ -1,8 +1,6 @@
 #ifndef SRC_CAT_FILES_H_
 #define SRC_CAT_FILES_H_
 
-#define BUFFERSIZE 4096
-
 #include <getopt.h>
 #include <stdio.h>
 
@@ -11,7 +9,7 @@ typedef struct filesData {
   unsigned int currentFileIndex;
   FILE* currentFile;
   char** fileNames;
-  char buffer[BUFFERSIZE];
+  char currentSymbol;
 } filesData;
 
 filesData init(int argc, char** argv, int optind);

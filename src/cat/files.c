@@ -52,8 +52,10 @@ void closeCurrentFile(filesData* data) {
 
 int readingFromFile(filesData* data) {
   int res = 1;
-  if (fgets(data->buffer, BUFFERSIZE,
-            (data->currentFile != NULL ? data->currentFile : stdin)) == NULL)
+  if ((data->currentSymbol =
+           fgetc(data->currentFile != NULL ? data->currentFile : stdin)) == EOF)
     res = 0;
+  // printf("%c\n", data->currentSymbol);
+
   return res;
 }

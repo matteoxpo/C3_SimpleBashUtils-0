@@ -6,7 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "files.h"
+#include "file.h"
+#include "filesData.h"
 #include "flags.h"
 
 int main(int argc, char **argv) {
@@ -15,16 +16,16 @@ int main(int argc, char **argv) {
 }
 
 void cat(int argc, char **argv) {
-  // Flags myFlags = getFlags(argc, argv);
-  filesData myFilesData = init(argc, argv, optind);
+  FilesData myFilesData = initFilesData(argc, argv, optind);
 
   while (!isAllFilesDone(myFilesData)) {
-    if (!openFile(&myFilesData)) return;
+    File myFile = initFile(myFilesData.currentFileName);
+    if (!openFile(&myFile)) return;
 
     // int lastLineBlank = 0;
     // int lineNumber = 1;
 
-    while (readingFromFile(&myFilesData)) {
+    while (readingFromFile(&myFile)) {
       // int length = strlen(myFilesData.buffer);
       // myFilesData.buffer[length - 1] = '\0';
 
@@ -58,13 +59,14 @@ void cat(int argc, char **argv) {
       //   myFilesData.buffer[length + 1] = '\0';
       // }
 
-      fprintf(stdout, "%c", myFilesData.currentSymbol);
+      fprintf(stdout, "%c", myFile.currentSymbol);
     }
 
-    closeCurrentFile(&myFilesData);
-    myFilesData.currentFileIndex++;
+    // closeCurrentFile(&myFilesData);
+    doStepToNextFile(&myFilesData);
+    closeFile(myFile);
   }
-  fprintf(stdout, "\n");
-  closeCurrentFile(&myFilesData);
-  destroy(myFilesData);
+  // fprintf(stdout, "\n");
+  // closeCurrentFile(&myFilesData);
+  destroyFilesData(myFilesData);
 }

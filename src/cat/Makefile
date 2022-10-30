@@ -1,7 +1,7 @@
 CC =gcc
-CFLAGS = -Wall -Werror -Wextra -c
+CFLAGS = -Wall -Wextra -c
 
-SOURCE = flags.c s21_cat.c files.c
+SOURCE = flags.c s21_cat.c filesData.c file.c
 OBJECTS = $(SOURCE:.c=.o)
 EXECUTABLE = CAT
 

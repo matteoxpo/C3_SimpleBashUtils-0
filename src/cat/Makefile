@@ -1,8 +1,16 @@
 CC =gcc
-CFLAGS = -Wall -Wextra -c
 
-SOURCE = flags.c s21_cat.c filesData.c file.c
+FLAGS_DIR = flags
+FILESDATA_DIR = filesData
+FILE_DIR = file
+
+INCLUDES = -I./$(FLAGS_DIR) -I./$(FILESDATA_DIR) -I./$(FILE_DIR) 
+
+CFLAGS = $(INCLUDES) -Wall -Wextra -Werror -c
+
+SOURCE = s21_cat.c $(FLAGS_DIR)/*.c $(FILESDATA_DIR)/*.c $(FILE_DIR)/*.c
 OBJECTS = $(SOURCE:.c=.o)
+
 EXECUTABLE = CAT
 
 all: $(OBJECTS)
@@ -15,4 +23,4 @@ rebuild: clean all
 
 clean:
 	-rm $(EXECUTABLE)
-	-rm *.o
+	-rm $(OBJECTS)

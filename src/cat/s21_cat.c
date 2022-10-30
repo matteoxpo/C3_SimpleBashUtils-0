@@ -29,7 +29,7 @@ void cat(int argc, char **argv) {
       // int length = strlen(myFilesData.buffer);
       // myFilesData.buffer[length - 1] = '\0';
 
-      // if (myFlags.sflag) {
+      // if (myFilesData.flags.sflag) {
       //   length = strlen(myFilesData.buffer);
       //   int currentLineBlank = (length <= 1) ? 1 : 0;
       //   if (lastLineBlank && currentLineBlank) {
@@ -58,15 +58,11 @@ void cat(int argc, char **argv) {
       //   myFilesData.buffer[length] = '$';
       //   myFilesData.buffer[length + 1] = '\0';
       // }
-
       fprintf(stdout, "%c", myFile.currentSymbol);
     }
 
-    // closeCurrentFile(&myFilesData);
     doStepToNextFile(&myFilesData);
     closeFile(myFile);
   }
-  // fprintf(stdout, "\n");
-  // closeCurrentFile(&myFilesData);
-  destroyFilesData(myFilesData);
+  myFilesData.del(&myFilesData);
 }

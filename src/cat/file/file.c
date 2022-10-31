@@ -71,3 +71,5 @@ void printChangedNotation(File f) {
     fprintf(stdout, "%c", f.currentSymbol);
   }
 }
+
+int isCurSymEqTab(File f) { return f.currentSymbol == '\t'; }

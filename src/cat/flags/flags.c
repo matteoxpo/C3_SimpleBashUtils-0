@@ -7,7 +7,7 @@ Flags getFlags(int argCount, char** argVector) {
   Flags myFlags;
   defaultFlags(&myFlags);
   int opt;
-  while ((opt = getopt_long(argCount, argVector, "benstv?", long_options,
+  while ((opt = getopt_long(argCount, argVector, "benstvT?", long_options,
                             NULL)) != -1) {
     switch (opt) {
       case 'b':

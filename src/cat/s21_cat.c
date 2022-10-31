@@ -27,6 +27,7 @@ void cat(int argc, char **argv) {
 
     while (readingFromFile(&myFile)) {
       if (myFilesData.flags.sflag && isLastTwoLineEmpty(myFile)) continue;
+
       if (myFilesData.flags.bflag && isCurrLineEmpty(myFile))
         fprintf(stdout, "%*d\t", 6, lineNumber++);
       else if (myFilesData.flags.nflag && isNewLine(myFile))
@@ -35,8 +36,10 @@ void cat(int argc, char **argv) {
       if (myFilesData.flags.eflag && isCurrSymbolEntry(myFile))
         fprintf(stdout, "$");
 
-      // if (myFilesData.flags.Tflag) {
-      // }
+      if (myFilesData.flags.Tflag && isCurSymEqTab(myFile)) {
+        fprintf(stdout, "^|");
+        continue;
+      }
 
       if (myFilesData.flags.vflag)
         printChangedNotation(myFile);

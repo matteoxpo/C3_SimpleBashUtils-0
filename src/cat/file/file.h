@@ -27,4 +27,5 @@ int isCurrLineEmpty(File f);
 int isNewLine(File f);
 int isCurrSymbolEntry(File f);
 void printChangedNotation(File f);
+int isCurSymEqTab(File f);
 #endif  // SRC_CAT_FILE_FILE_H_

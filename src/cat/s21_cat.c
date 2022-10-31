@@ -23,43 +23,25 @@ void cat(int argc, char **argv) {
     if (!openFile(&myFile)) return;
 
     // int lastLineBlank = 0;
-    // int lineNumber = 1;
+    int lineNumber = 1;
 
     while (readingFromFile(&myFile)) {
-      // int length = strlen(myFilesData.buffer);
-      // myFilesData.buffer[length - 1] = '\0';
+      if (myFilesData.flags.sflag && isLastTwoLineEmpty(myFile)) continue;
+      if (myFilesData.flags.bflag && isCurrLineEmpty(myFile))
+        fprintf(stdout, "%*d\t", 6, lineNumber++);
+      else if (myFilesData.flags.nflag && isNewLine(myFile))
+        fprintf(stdout, "%*d\t", 6, lineNumber++);
 
-      if (myFilesData.flags.sflag && isLastTwoStrEmpty(myFile)) {
-        continue;
-        //   length = strlen(myFilesData.buffer);
-        //   int currentLineBlank = (length <= 1) ? 1 : 0;
-        //   if (lastLineBlank && currentLineBlank) {
-        //     continue;
-        //   }
-        //   lastLineBlank = currentLineBlank;
-      }
+      if (myFilesData.flags.eflag && isCurrSymbolEntry(myFile))
+        fprintf(stdout, "$");
 
-      // if (myFlags.bflag) {
-      //   length = strlen(myFilesData.buffer);
-      //   if (length >= 1) {
-      //     char *tmp = strdup(myFilesData.buffer);
-      //     myFilesData.buffer[0] = '\0';
-      //     sprintf(myFilesData.buffer, "%*d\t", 6, lineNumber++);
-      //     strcat(myFilesData.buffer, tmp);
-      //   }
-      // } else if (myFlags.nflag) {
-      //   char *tmp = strdup(myFilesData.buffer);
-      //   myFilesData.buffer[0] = '\0';
-      //   sprintf(myFilesData.buffer, "%*d\t", 6, lineNumber++);
-      //   strcat(myFilesData.buffer, tmp);
+      // if (myFilesData.flags.Tflag) {
       // }
 
-      // if (myFlags.eflag) {
-      //   length = strlen(myFilesData.buffer);
-      //   myFilesData.buffer[length] = '$';
-      //   myFilesData.buffer[length + 1] = '\0';
-      // }
-      fprintf(stdout, "%c", myFile.currentSymbol);
+      if (myFilesData.flags.vflag)
+        printChangedNotation(myFile);
+      else
+        fprintf(stdout, "%c", myFile.currentSymbol);
     }
 
     doStepToNextFile(&myFilesData);

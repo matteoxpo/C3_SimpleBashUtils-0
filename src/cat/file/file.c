@@ -7,9 +7,9 @@ File initFile(char* fName) {
 
   newFile.currentLine = 1;
   newFile.currentLineSize = 0;
-  newFile.currentSymbol = '0';
-  newFile.pervSymbol = '0';
-  newFile.prevPervSymbol = '0';
+  newFile.currentSymbol = '\n';
+  newFile.pervSymbol = '\n';
+  newFile.prevPervSymbol = '\n';
 
   newFile.fileName = fName;
 
@@ -46,7 +46,28 @@ int readingFromFile(File* f) {
   return res;
 }
 
-int isLastTwoStrEmpty(File f) {
+int isLastTwoLineEmpty(File f) {
   return (f.currentSymbol == '\n' && f.pervSymbol == '\n' &&
           f.prevPervSymbol == '\n');
+}
+
+int isCurrLineEmpty(File f) {
+  return f.pervSymbol == '\n' && f.currentSymbol != '\n';
+}
+
+int isNewLine(File f) { return f.pervSymbol == '\n'; }
+
+int isCurrSymbolEntry(File f) { return f.currentSymbol == '\n'; }
+
+void printChangedNotation(File f) {
+  char c = f.currentSymbol & 127;
+  if ((c >= 0 && c <= 8) || (c >= 11 && c <= 31)) {
+    if (f.currentSymbol < 0) fprintf(stdout, "M-");
+    c += 64;
+    fprintf(stdout, "^%c", c);
+  } else if (c == 127) {
+    fprintf(stdout, "^?");
+  } else if ((c > 31 && c < 127) || c == '\n' || c == '\t') {
+    fprintf(stdout, "%c", f.currentSymbol);
+  }
 }

@@ -11,19 +11,29 @@ Flags getFlags(int argCount, char** argVector) {
                             NULL)) != -1) {
     switch (opt) {
       case 'b':
-        myFlags.bflag = FLAGACTIVATED;
+        myFlags.bflag = FLAGACTIVATED;  // yes
+        break;
+      case 'v':
+        myFlags.vflag = FLAGACTIVATED;  // no
+        break;
+      case 'E':
+        myFlags.eflag = FLAGACTIVATED;  // yes
         break;
       case 'e':
-        myFlags.eflag = FLAGACTIVATED;
+        myFlags.eflag = FLAGACTIVATED;  // yes
+        myFlags.vflag = FLAGACTIVATED;  // yes
         break;
       case 'n':
-        myFlags.nflag = FLAGACTIVATED;
+        myFlags.nflag = FLAGACTIVATED;  // yes
         break;
       case 's':
-        myFlags.sflag = FLAGACTIVATED;
+        myFlags.sflag = FLAGACTIVATED;  // yes
+        break;
+      case 'T':
+        myFlags.Tflag = FLAGACTIVATED;  // yes
         break;
       case 't':
-      case 'v':
+        myFlags.Tflag = FLAGACTIVATED;  // yes
         myFlags.vflag = FLAGACTIVATED;
         break;
       case '?':
@@ -34,5 +44,5 @@ Flags getFlags(int argCount, char** argVector) {
 }
 void defaultFlags(Flags* flags) {
   flags->bflag = flags->eflag = flags->nflag = flags->sflag = flags->vflag =
-      FLAGAINCTIVATED;
+      flags->Tflag = FLAGAINCTIVATED;
 }

@@ -11,10 +11,6 @@ CFLAGS = $(INCLUDES) -Wall -Wextra -Werror -c
 SOURCE = s21_cat.c $(wildcard $(FLAGS_DIR)/*.c) $(wildcard $(FILESDATA_DIR)/*.c) $(wildcard $(FILE_DIR)/*.c)
 OBJECTS = $(SOURCE:.c=.o)
 
-
-%.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
-
 EXECUTABLE = CAT
 
 all: $(OBJECTS)
@@ -24,6 +20,8 @@ re: rebuild
 
 rebuild: clean all
 
+%.o: %.c
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	-rm $(EXECUTABLE)

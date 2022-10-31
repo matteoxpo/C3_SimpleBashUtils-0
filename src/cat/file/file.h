@@ -22,6 +22,9 @@ File initFile(char* fName);
 int openFile(File* f);
 void closeFile(File f);
 int readingFromFile(File* f);
-int isLastTwoStrEmpty(File f);
-
+int isLastTwoLineEmpty(File f);
+int isCurrLineEmpty(File f);
+int isNewLine(File f);
+int isCurrSymbolEntry(File f);
+void printChangedNotation(File f);
 #endif  // SRC_CAT_FILE_FILE_H_

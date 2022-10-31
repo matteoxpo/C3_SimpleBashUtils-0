@@ -16,6 +16,8 @@ EXECUTABLE = CAT
 all: $(OBJECTS)
 	$(CC) $(OBJECTS)  -o $(EXECUTABLE)
 
+re: rebuild
+
 rebuild: clean all
 
 .o: .c

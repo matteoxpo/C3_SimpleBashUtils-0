@@ -12,8 +12,9 @@ typedef struct s_File {
   unsigned int currentLine;
   unsigned int currentLineSize;
 
-  unsigned int isPrevLineEmpty;
   char currentSymbol;
+  char pervSymbol;
+  char prevPervSymbol;
 
 } File;
 
@@ -21,5 +22,6 @@ File initFile(char* fName);
 int openFile(File* f);
 void closeFile(File f);
 int readingFromFile(File* f);
+int isLastTwoStrEmpty(File f);
 
 #endif  // SRC_CAT_FILE_FILE_H_

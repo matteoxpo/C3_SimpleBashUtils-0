@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 }
 
 void cat(int argc, char **argv) {
-  FilesData myFilesData = initFilesData(argc, argv, optind);
+  FilesData myFilesData = initFilesData(argc, argv);
 
   while (!isAllFilesDone(myFilesData)) {
     File myFile = initFile(myFilesData.currentFileName);
@@ -29,14 +29,15 @@ void cat(int argc, char **argv) {
       // int length = strlen(myFilesData.buffer);
       // myFilesData.buffer[length - 1] = '\0';
 
-      // if (myFilesData.flags.sflag) {
-      //   length = strlen(myFilesData.buffer);
-      //   int currentLineBlank = (length <= 1) ? 1 : 0;
-      //   if (lastLineBlank && currentLineBlank) {
-      //     continue;
-      //   }
-      //   lastLineBlank = currentLineBlank;
-      // }
+      if (myFilesData.flags.sflag && isLastTwoStrEmpty(myFile)) {
+        continue;
+        //   length = strlen(myFilesData.buffer);
+        //   int currentLineBlank = (length <= 1) ? 1 : 0;
+        //   if (lastLineBlank && currentLineBlank) {
+        //     continue;
+        //   }
+        //   lastLineBlank = currentLineBlank;
+      }
 
       // if (myFlags.bflag) {
       //   length = strlen(myFilesData.buffer);

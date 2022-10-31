@@ -18,7 +18,7 @@ typedef struct s_FilesData {
   void (*del)(struct s_FilesData* self);
 } FilesData;
 
-FilesData initFilesData(int argc, char** argv, int index);
+FilesData initFilesData(int argc, char** argv);
 void destroyFilesData(FilesData* data);
 
 int isAllFilesDone(FilesData data);

@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-FilesData initFilesData(int argCount, char** argVector, int index) {
+FilesData initFilesData(int argCount, char** argVector) {
   FilesData myFilesData;
 
   myFilesData.flags = getFlags(argCount, argVector);
 
   myFilesData.currentFileIndex = 0;
-
+  int index = optind;
   int count = argCount - index;
   myFilesData.filesCount = count;
 

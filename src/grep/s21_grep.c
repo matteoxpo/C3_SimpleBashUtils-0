@@ -14,6 +14,15 @@ int main(int argc, char** argv) {
 
 void grep(int argCount, char** argVector) {
   Grep myGrep = initGrep(argCount, argVector);
+  // printf(
+  //     "count == %zu\nflagE == %d\tflagI == %d\nflagV == %d\tflagC ==
+  //     %d\nflagL "
+  //     "== %d\tflagN == %d\nflagH == %d\tflagS == %d\n",
+  //     myGrep.regExCount, myGrep.flags & E_FLAG_ACTIVATED,
+  //     myGrep.flags & I_FLAG_ACTIVATED, myGrep.flags & V_FLAG_ACTIVATED,
+  //     myGrep.flags & C_FLAG_ACTIVATED, myGrep.flags & L_FLAG_ACTIVATED,
+  //     myGrep.flags & N_FLAG_ACTIVATED, myGrep.flags & H_FLAG_ACTIVATED,
+  //     myGrep.flags & S_FLAG_ACTIVATED);
   destroyGrep(&myGrep);
 }
 
@@ -21,7 +30,7 @@ Grep initGrep(int argCount, char** argVector) {
   Grep newGrep;
   newGrep.regEx = malloc(sizeof(pcre*));
   newGrep.regExCount = newGrep.flags = 0;
-  fillFlags(&newGrep, argCount, argVector);
+  fillFlags((&newGrep), argCount, argVector);
 
   return newGrep;
 }
@@ -90,16 +99,17 @@ pcre* getCompileRegex(char* reg) {
   return regCompiled;
 }
 
-int addCompiledRegex(Grep** src, pcre* compiledReg) {
+int addCompiledRegex(Grep* src, pcre* compiledReg) {
   int res = 1;
-  size_t count = (*src)->regExCount;
-  Grep* newSrc = realloc(*src, count + 1);
-  if (newSrc != NULL) {
-    *src = newSrc;
-    (*src)->regEx[count] = compiledReg;
-    (*src)->regExCount++;
-  } else {
-    res = 0;
+  size_t count = src->regExCount;
+  if (src != NULL) {
+    src->regEx = realloc(src->regEx, (count + 1) * sizeof(pcre*));
+    if (src->regEx != NULL) {
+      src->regEx[count] = compiledReg;
+      src->regExCount++;
+    } else {
+      res = 0;
+    }
   }
   return res;
 }

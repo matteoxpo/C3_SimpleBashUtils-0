@@ -21,11 +21,11 @@ typedef struct s_Grep {  // MAIN
   size_t flags;
 
 } Grep;
-void grep(int argCount, char** argVector);
+void grep(int, char**);
 Grep initGrep(int, char**);
 void destroyGrep(Grep*);
 int fillFlags(Grep*, int, char**);
 int addAndCompileRegex(Grep*, char*);
 pcre* getCompileRegex(char*);
-int addCompiledRegex(Grep**, pcre*);
+int addCompiledRegex(Grep*, pcre*);
 #endif  // SRC_GREP_S21_GREP_H_

@@ -90,12 +90,14 @@ pcre* getCompileRegex(char* reg) {
   return regCompiled;
 }
 
-int addCompiledRegex(Grep* src, pcre* compiledReg) {
+int addCompiledRegex(Grep** src, pcre* compiledReg) {
   int res = 1;
-  size_t count = src->regExCount;
-  if (realloc(src, count + 1)) {
-    src->regEx[count] = compiledReg;
-    src->regExCount++;
+  size_t count = (*src)->regExCount;
+  Grep* newSrc = realloc(*src, count + 1);
+  if (newSrc != NULL) {
+    *src = newSrc;
+    (*src)->regEx[count] = compiledReg;
+    (*src)->regExCount++;
   } else {
     res = 0;
   }

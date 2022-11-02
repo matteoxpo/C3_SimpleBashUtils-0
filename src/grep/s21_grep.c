@@ -78,19 +78,17 @@ int addAndCompileRegex(Grep* src, char* reg) {
 
 pcre* getCompileRegex(char* reg) {
   pcre* regCompiled = NULL;
-  // const lower
   const char* error = NULL;
   int erroffset;
   regCompiled = pcre_compile(reg, 0, &error, &erroffset, NULL);
 
-  // error check
+  // ! add error check
   return regCompiled;
 }
 
 int addCompiledRegex(Grep* src, pcre* compiledReg) {
   int res = 1;
-  Grep* savetyGrep = realloc(src, 1);
-  if (savetyGrep != NULL) {
+  if (realloc(src, 1)) {
     src->regEx[src->regExCount] = compiledReg;
     src->regExCount++;
   } else {

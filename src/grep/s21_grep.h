@@ -21,9 +21,9 @@ typedef struct s_Grep {  // MAIN
   size_t flags;
 
 } Grep;
-
+void grep(int argCount, char** argVector);
 Grep initGrep(int, char**);
-void destoryGrep(Grep*);
+void destroyGrep(Grep*);
 int fillFlags(Grep*, int, char**);
 int addAndCompileRegex(Grep*, char*);
 pcre* getCompileRegex(char*);

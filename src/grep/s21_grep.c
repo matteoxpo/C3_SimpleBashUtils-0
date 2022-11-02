@@ -8,9 +8,13 @@
 #include <unistd.h>
 
 int main(int argc, char** argv) {
-  Grep myGrep = initGrep(argc, argv);
-  destroyGrep(myGrep);
+  grep(argc, argv);
   return 0;
+}
+
+void grep(int argCount, char** argVector) {
+  Grep myGrep = initGrep(argCount, argVector);
+  destroyGrep(&myGrep);
 }
 
 Grep initGrep(int argCount, char** argVector) {
@@ -21,7 +25,7 @@ Grep initGrep(int argCount, char** argVector) {
 
   return newGrep;
 }
-void destoryGrep(Grep* src) {
+void destroyGrep(Grep* src) {
   for (int i = 0; i < src->regExCount; i++)
     if (src->regEx[i] != NULL) free(src->regEx[i]);
   if (src->regEx != NULL) free(src->regEx);
@@ -88,8 +92,9 @@ pcre* getCompileRegex(char* reg) {
 
 int addCompiledRegex(Grep* src, pcre* compiledReg) {
   int res = 1;
-  if (realloc(src, 1)) {
-    src->regEx[src->regExCount] = compiledReg;
+  size_t count = src->regExCount;
+  if (realloc(src, count + 1)) {
+    src->regEx[count] = compiledReg;
     src->regExCount++;
   } else {
     res = 0;

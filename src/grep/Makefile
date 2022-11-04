@@ -1,24 +1,40 @@
-.PHONY: all, clean, rebuild, s21_cat, s21_grep, re
+.PHONY: all, clean, rebuild, s21_cat , re
 
-CC = gcc
-#CFLAGS = -c -Wall -Werror -Wextra -lpcre
-CFLAGS = -lpcre
+CC =gcc
 
-SOURCES = s21_grep.c
-OBJECTS = $(SOURCES:.c=.o)
+FILESDATA_DIR = ../common/filesData
+FILE_DIR = ../common/file
 
-EXECUTABLE = MAIN.out
+INCLUDES =  -I./$(FILESDATA_DIR) -I./$(FILE_DIR) 
 
+CFLAGS =  -Wall -Wextra -Werror -c
+
+LIBFLAGS = -lpcre
+
+SOURCE = s21_grep.c $(wildcard $(FILESDATA_DIR)/*.c) $(wildcard $(FILE_DIR)/*.c)
+OBJECTS = $(SOURCE:.c=.o)
+
+
+
+EXECUTABLE = grep
+
+.PHONY: s21_grep
+s21_grep: all
+
+.PHONY: all
 all: $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE)
+	$(CC) $(LIBFLAGS) $(INCLUDES) $(OBJECTS) -o $(EXECUTABLE)
 
+.PHONY: re
 re: rebuild
 
+.PHONY: rebuild
 rebuild: clean all
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(LIBFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
 
+.PHONY: clean
 clean:
-	-rm  $(wildcard *.o)
-	-rm $(wildcard *.out)
+	-rm $(EXECUTABLE)
+	-rm $(OBJECTS)

@@ -14,18 +14,27 @@
 #define F_FLAG_ACTIVATED 0b0100000000
 #define O_FLAG_ACTIVATED 0b1000000000
 
-typedef struct s_Grep {  // MAIN
-  /* data */
+typedef struct s_Grep {
   pcre** regEx;
   size_t regExCount;
   size_t flags;
-
 } Grep;
 void grep(int, char**);
 Grep initGrep(int, char**);
 void destroyGrep(Grep*);
-int fillFlags(Grep*, int, char**);
-int addAndCompileRegex(Grep*, char*);
-pcre* getCompileRegex(char*);
+void fillFlags(Grep*, int, char**);
+int addAndCompileRegex(Grep*, char*, int);
+pcre* getCompiledRegex(char*, int);
 int addCompiledRegex(Grep*, pcre*);
+
+int isEFlagActivated(Grep);
+int isIFlagActivated(Grep);
+int isVFlagActivated(Grep);
+int isCFlagActivated(Grep);
+int isLFlagActivated(Grep);
+int isNFlagActivated(Grep);
+int isHFlagActivated(Grep);
+int isSFlagActivated(Grep);
+int isFFlagActivated(Grep);
+int isOFlagActivated(Grep);
 #endif  // SRC_GREP_S21_GREP_H_

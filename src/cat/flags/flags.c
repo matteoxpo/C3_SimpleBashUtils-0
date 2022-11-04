@@ -6,43 +6,49 @@
 Flags getFlags(int argCount, char** argVector) {
   Flags myFlags;
   defaultFlags(&myFlags);
+  myFlags.binFlags = 0;
   int opt;
   while ((opt = getopt_long(argCount, argVector, "benstvTE?", long_options,
                             NULL)) != -1) {
     switch (opt) {
       case 'b':
-        myFlags.bflag = FLAGACTIVATED;
+        myFlags.binFlags |= B_FLAG_ACTIVATED;
         break;
       case 'v':
-        myFlags.vflag = FLAGACTIVATED;
+        myFlags.binFlags |= V_FLAG_ACTIVATED;
         break;
       case 'E':
-        myFlags.eflag = FLAGACTIVATED;
+        myFlags.binFlags |= E_FLAG_ACTIVATED;
         break;
       case 'e':
-        myFlags.eflag = FLAGACTIVATED;
-        myFlags.vflag = FLAGACTIVATED;
+        myFlags.binFlags |= E_FLAG_ACTIVATED;
+        myFlags.binFlags |= V_FLAG_ACTIVATED;
         break;
       case 'n':
-        myFlags.nflag = FLAGACTIVATED;
+        myFlags.binFlags |= N_FLAG_ACTIVATED;
         break;
       case 's':
-        myFlags.sflag = FLAGACTIVATED;
+        myFlags.binFlags |= S_FLAG_ACTIVATED;
         break;
       case 'T':
-        myFlags.Tflag = FLAGACTIVATED;
+        myFlags.binFlags |= T_FLAG_ACTIVATED;
         break;
       case 't':
-        myFlags.Tflag = FLAGACTIVATED;
-        myFlags.vflag = FLAGACTIVATED;
+        myFlags.binFlags |= T_FLAG_ACTIVATED;
+        myFlags.binFlags |= V_FLAG_ACTIVATED;
         break;
       case '?':
         printf("usage: cat [-bens] [file ...]\n");
+        break;
     }
   }
   return myFlags;
 }
-void defaultFlags(Flags* flags) {
-  flags->bflag = flags->eflag = flags->nflag = flags->sflag = flags->vflag =
-      flags->Tflag = FLAGAINCTIVATED;
-}
+void defaultFlags(Flags* f) { f->binFlags = 0; }
+
+int isBFlagActivated(Flags f) { return f.binFlags & B_FLAG_ACTIVATED; }
+int isEFlagActivated(Flags f) { return f.binFlags & E_FLAG_ACTIVATED; }
+int isNFlagActivated(Flags f) { return f.binFlags & N_FLAG_ACTIVATED; }
+int isSFlagActivated(Flags f) { return f.binFlags & S_FLAG_ACTIVATED; }
+int isTFlagActivated(Flags f) { return f.binFlags & T_FLAG_ACTIVATED; }
+int isVFlagActivated(Flags f) { return f.binFlags & V_FLAG_ACTIVATED; }

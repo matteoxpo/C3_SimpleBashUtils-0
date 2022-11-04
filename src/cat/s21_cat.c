@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 }
 
 void cat(int argc, char **argv) {
+  Flags flags = getFlags(argc, argv);
   FilesData myFilesData = initFilesData(argc, argv);
 
   while (!isAllFilesDone(myFilesData)) {
@@ -25,23 +26,23 @@ void cat(int argc, char **argv) {
       continue;
     }
     int lineNumber = 1;
-    while (readingFromFile(&myFile)) {
-      if (myFilesData.flags.sflag && isLastTwoLineEmpty(myFile)) continue;
+    while (readingSymbolFromFile(&myFile)) {
+      if (isSFlagActivated(flags) && isLastTwoLineEmpty(myFile)) continue;
 
-      if (myFilesData.flags.bflag && isCurrLineEmpty(myFile))
+      if (isBFlagActivated(flags) && isCurrLineEmpty(myFile))
         fprintf(stdout, "%*d\t", 6, lineNumber++);
-      else if (myFilesData.flags.nflag && isNewLine(myFile))
+      else if (isNFlagActivated(flags) && isNewLine(myFile))
         fprintf(stdout, "%*d\t", 6, lineNumber++);
 
-      if (myFilesData.flags.eflag && isCurrSymbolEntry(myFile))
+      if (isEFlagActivated(flags) && isCurrSymbolEntry(myFile))
         fprintf(stdout, "$");
 
-      if (myFilesData.flags.Tflag && isCurSymEqTab(myFile)) {
+      if (isTFlagActivated(flags) && isCurSymEqTab(myFile)) {
         fprintf(stdout, "^|");
         continue;
       }
 
-      if (myFilesData.flags.vflag)
+      if (isVFlagActivated(flags))
         printChangedNotation(myFile);
       else
         fprintf(stdout, "%c", myFile.currentSymbol);

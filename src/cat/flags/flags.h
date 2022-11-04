@@ -4,6 +4,13 @@
 #define FLAGACTIVATED 1
 #define FLAGAINCTIVATED 0
 
+#define B_FLAG_ACTIVATED 0b0000000001
+#define E_FLAG_ACTIVATED 0b0000000010
+#define N_FLAG_ACTIVATED 0b0000000100
+#define S_FLAG_ACTIVATED 0b0000001000
+#define T_FLAG_ACTIVATED 0b0000010000
+#define V_FLAG_ACTIVATED 0b0000100000
+
 #include <getopt.h>
 #include <stdio.h>
 
@@ -18,8 +25,15 @@ static struct option const long_options[] = {
 };
 
 typedef struct s_flags {
-  unsigned short bflag, eflag, nflag, sflag, vflag, Tflag;
+  // unsigned short bflag, eflag, nflag, sflag, vflag, Tflag;
+  size_t binFlags;
 } Flags;
-Flags getFlags(int argCount, char** argVector);
-void defaultFlags(Flags* flags);
+Flags getFlags(int, char**);
+void defaultFlags(Flags*);
+int isBFlagActivated(Flags);
+int isEFlagActivated(Flags);
+int isNFlagActivated(Flags);
+int isSFlagActivated(Flags);
+int isTFlagActivated(Flags);
+int isVFlagActivated(Flags);
 #endif  // SRC_CAT_FLAGS_FLAGS_H_

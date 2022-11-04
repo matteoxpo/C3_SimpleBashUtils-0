@@ -7,33 +7,33 @@ Flags getFlags(int argCount, char** argVector) {
   Flags myFlags;
   defaultFlags(&myFlags);
   int opt;
-  while ((opt = getopt_long(argCount, argVector, "benstvT?", long_options,
+  while ((opt = getopt_long(argCount, argVector, "benstvTE?", long_options,
                             NULL)) != -1) {
     switch (opt) {
       case 'b':
-        myFlags.bflag = FLAGACTIVATED;  // yes
+        myFlags.bflag = FLAGACTIVATED;
         break;
       case 'v':
-        myFlags.vflag = FLAGACTIVATED;  // no
+        myFlags.vflag = FLAGACTIVATED;
         break;
       case 'E':
-        myFlags.eflag = FLAGACTIVATED;  // yes
+        myFlags.eflag = FLAGACTIVATED;
         break;
       case 'e':
-        myFlags.eflag = FLAGACTIVATED;  // yes
-        myFlags.vflag = FLAGACTIVATED;  // yes
+        myFlags.eflag = FLAGACTIVATED;
+        myFlags.vflag = FLAGACTIVATED;
         break;
       case 'n':
-        myFlags.nflag = FLAGACTIVATED;  // yes
+        myFlags.nflag = FLAGACTIVATED;
         break;
       case 's':
-        myFlags.sflag = FLAGACTIVATED;  // yes
+        myFlags.sflag = FLAGACTIVATED;
         break;
       case 'T':
-        myFlags.Tflag = FLAGACTIVATED;  // yes
+        myFlags.Tflag = FLAGACTIVATED;
         break;
       case 't':
-        myFlags.Tflag = FLAGACTIVATED;  // yes
+        myFlags.Tflag = FLAGACTIVATED;
         myFlags.vflag = FLAGACTIVATED;
         break;
       case '?':

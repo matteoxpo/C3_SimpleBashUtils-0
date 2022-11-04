@@ -19,12 +19,12 @@ void cat(int argc, char **argv) {
   FilesData myFilesData = initFilesData(argc, argv);
 
   while (!isAllFilesDone(myFilesData)) {
-    File myFile = initFile(myFilesData.currentFileName);
-    if (!openFile(&myFile)) return;
-
-    // int lastLineBlank = 0;
+    File myFile = initFile(myFilesData.currentFileName, ERRORR_MESSAGE_ON);
+    if (!openFile(&myFile, ERRORR_MESSAGE_ON)) {
+      doStepToNextFile(&myFilesData);
+      continue;
+    }
     int lineNumber = 1;
-
     while (readingFromFile(&myFile)) {
       if (myFilesData.flags.sflag && isLastTwoLineEmpty(myFile)) continue;
 

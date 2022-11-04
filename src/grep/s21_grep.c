@@ -18,19 +18,51 @@ int main(int argc, char** argv) {
 void grep(int argCount, char** argVector) {
   Grep myGrep = initGrep(argCount, argVector);
   FilesData myFilesData = initFilesData(argCount, argVector);
+
+  printf("filesCount == %d currentFileName == %s\n", myFilesData.filesCount,
+         myFilesData.currentFileName);
+  printf("RegEXCount == %d flags == %zu\n", myGrep.regExCount, myGrep.flags);
+
+  //
+
+  //
+
+  if ((!isEFlagActivated(myGrep))) {
+    addAndCompileRegex(&myGrep, myFilesData.currentFileName, myGrep.regOptions);
+    doStepToNextFile(&myFilesData);
+  }
+  //
+
+  //
   while (!isAllFilesDone(myFilesData)) {
-    File myFile = initFile(myFilesData.currentFileName, ERRORR_MESSAGE_ON);
-    if (!openFile(&myFile, ERRORR_MESSAGE_ON)) {
+    File myFile =
+        initFile(myFilesData.currentFileName, isSFlagActivated(myGrep));
+
+    if (!openFile(&myFile, !isSFlagActivated(myGrep))) {
       doStepToNextFile(&myFilesData);
       continue;
     }
-    while (readingSymbolFromFile(&myFile)) {
-      // flags procesing needs to be here
-    }
 
-    doStepToNextFile(&myFilesData);
+    char* lineFromFile = NULL;
+    size_t sizeOfLine = 0;
+    int mass[1026];
+    while (getline(&lineFromFile, &sizeOfLine, myFile.fileStream) != -1) {
+      //
+      int count = 0;
+      for (int i = 0; i < myGrep.regExCount; i++) {
+        count = pcre_exec(myGrep.regEx[i], NULL, lineFromFile, sizeOfLine, 0, 0,
+                          mass, 1026);
+        if (count > 0) {
+          printf("%s", lineFromFile);
+        }
+      }
+    }
     closeFile(myFile);
+    doStepToNextFile(&myFilesData);
   }
+  //
+
+  //
 
   destroyGrep(&myGrep);
   myFilesData.del(&myFilesData);
@@ -45,19 +77,20 @@ Grep initGrep(int argCount, char** argVector) {
   return newGrep;
 }
 void destroyGrep(Grep* src) {
-  for (size_t i = 0; i < src->regExCount; i++)
+  for (int i = 0; i < src->regExCount; i++)
     if (src->regEx[i] != NULL) free(src->regEx[i]);
   if (src->regEx != NULL) free(src->regEx);
 }
 
 void fillFlags(Grep* src, int argCount, char** argVector) {
   int opt;
-  int options = 0;
-  1 while ((opt = getopt(argCount, argVector, "e:ivclnsf:o?")) != -1) {
+  src->regOptions = 0;
+  while ((opt = getopt_long(argCount, argVector, "e:ivclnsf:o?", NULL, NULL)) !=
+         -1) {
     switch (opt) {
       case 'i':
         src->flags |= I_FLAG_ACTIVATED;
-        options |= PCRE_CASELESS;
+        src->regOptions |= PCRE_CASELESS;
         break;
       case 's':
         src->flags |= S_FLAG_ACTIVATED;
@@ -66,23 +99,24 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
         printf("!!!\n");
     }
   }
-
-  while ((opt = getopt(argCount, argVector, "e:ivclnsf:o?")) != -1) {
+  optind = 1;
+  while ((opt = getopt_long(argCount, argVector, "e:ivclnsf:o?", NULL, NULL)) !=
+         -1) {
     switch (opt) {
       case 'e':
         src->flags |= E_FLAG_ACTIVATED;
-        addAndCompileRegex(src, optarg, options);
+        addAndCompileRegex(src, optarg, src->regOptions);
         break;
       case 'f':
         src->flags |= F_FLAG_ACTIVATED;
-        File myFile = initFile(optarg, src->flags && S_FLAG_ACTIVATED);
+        File myFile = initFile(optarg, !isSFlagActivated(*src));
         if (isFileOpened(myFile)) {
           char* reg = getFirstWordFromFile(myFile);
           if (reg != NULL) {
-            addAndCompileRegex(src, reg, options);
+            addAndCompileRegex(src, reg, src->regOptions);
             free(reg);
-          } else if (!(src->flags && S_FLAG_ACTIVATED)) {
-            printf("empty file\n");
+          } else if (!(isSFlagActivated(*src))) {
+            printf("%s: Empty file\n", reg);
           }
           closeFile(myFile);
         }
@@ -129,7 +163,6 @@ pcre* getCompiledRegex(char* reg, int options) {
   const char* error = NULL;
   int erroffset;
   regCompiled = pcre_compile(reg, options, &error, &erroffset, NULL);
-
   // ! add error check
   return regCompiled;
 }

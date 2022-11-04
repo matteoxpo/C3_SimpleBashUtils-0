@@ -16,8 +16,9 @@
 
 typedef struct s_Grep {
   pcre** regEx;
-  size_t regExCount;
+  int regExCount;
   size_t flags;
+  int regOptions;
 } Grep;
 void grep(int, char**);
 Grep initGrep(int, char**);

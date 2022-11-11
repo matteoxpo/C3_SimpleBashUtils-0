@@ -5,6 +5,7 @@
 #include <pcre.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "file.h"
@@ -18,11 +19,8 @@ int main(int argc, char** argv) {
 void grep(int argCount, char** argVector) {
   Grep myGrep = initGrep(argCount, argVector);
   FilesData myFilesData = initFilesData(argCount, argVector);
+  if (!isEFlagActivated(myGrep)) findAndSetPattern(&myGrep, &myFilesData);
 
-  if ((!isEFlagActivated(myGrep))) {
-    addAndCompileRegex(&myGrep, myFilesData.currentFileName, myGrep.regOptions);
-    doStepToNextFile(&myFilesData);
-  }
   while (!isAllFilesDone(myFilesData)) {
     File myFile =
         initFile(myFilesData.currentFileName, isSFlagActivated(myGrep));
@@ -31,22 +29,30 @@ void grep(int argCount, char** argVector) {
       doStepToNextFile(&myFilesData);
       continue;
     }
+    // l --> c --> v --> o
+    // h s
 
-    char* lineFromFile = NULL;
-    size_t sizeOfLine = 0;
-    int mass[1026];
-    while (getline(&lineFromFile, &sizeOfLine, myFile.fileStream) != -1) {
-      //
-      int count = 0;
+    while (readLineFromFile(&myFile)) {
+      int isMatched = 0;
+      int matchedCount = 0;
       for (int i = 0; i < myGrep.regExCount; i++) {
-        count = pcre_exec(myGrep.regEx[i], NULL, lineFromFile, sizeOfLine, 0, 0,
-                          mass, 1026);
-        if (count > 0) {
-          printf("%s", lineFromFile);
+        isMatched = setMatchedIndex(&myGrep, myFile, i, 0);
+        // if (isMatched == REG_INDEX_ERROR) exit(0);  // AAaAAAaAaaaaAaaaAAA
+
+        if (isMatched && !isVFlagActivated(myGrep)) {
+          ActIfVFlagNonActivated(&myGrep, &myFilesData, &myFile, i);
+          matchedCount++;
+        } else if (!isMatched && isVFlagActivated(myGrep)) {
+          // something else lol
+        }
+
+        if (isCFlagActivated(myGrep)) {
+          printf("%d", matchedCount);
         }
       }
+      resetLineFromfile(&myFile);
     }
-    closeFile(myFile);
+    resetFile(&myFile);
     doStepToNextFile(&myFilesData);
   }
   destroyGrep(&myGrep);
@@ -55,16 +61,71 @@ void grep(int argCount, char** argVector) {
 
 Grep initGrep(int argCount, char** argVector) {
   Grep newGrep;
+  newGrep.matchedIndexes[0] = newGrep.matchedIndexes[1] =
+      newGrep.matchedIndexes[2] = -1;
   newGrep.regEx = malloc(sizeof(pcre*));
   newGrep.regExCount = newGrep.flags = 0;
   fillFlags((&newGrep), argCount, argVector);
 
   return newGrep;
 }
+
 void destroyGrep(Grep* src) {
   for (int i = 0; i < src->regExCount; i++)
     if (src->regEx[i] != NULL) free(src->regEx[i]);
   if (src->regEx != NULL) free(src->regEx);
+}
+
+int setMatchedIndex(Grep* src, File f, int index, int start) {
+  int res = REG_INDEX_ERROR;
+  if (index > -1 && index < src->regExCount)
+    res = pcre_exec(src->regEx[index], NULL, f.lineFromFile,
+                    strlen(f.lineFromFile), start, 0, src->matchedIndexes,
+                    MATCHED_INDEX_ARR_SIZE);
+  return res;
+}
+
+void findAndSetPattern(Grep* src, FilesData* data) {
+  addAndCompileRegex(src, data->currentFileName, src->regOptions);
+  doStepToNextFile(data);
+}
+
+void ActIfVFlagNonActivated(Grep* g, FilesData* d, File* f, int regIndex) {
+  if (isLFlagActivated(*g)) {
+    printf("%s\n", f->fileName);
+    return;
+  }
+  if (isCFlagActivated(*g)) {
+    if (d->filesCount > 1) printf("%s\n", f->fileName);
+    return;
+  }
+
+  if (isOFlagActivated(*g)) {
+    int start = g->matchedIndexes[0];
+    int end = g->matchedIndexes[1];
+    if (start != end) {
+      if (isNFlagActivated(*g)) {
+        printf("%d:", f->numLineInFile);
+      }
+      for (int i = start; i < end; i++) {
+        printf("%c", f->lineFromFile[i]);
+      }
+      printf("\n");
+      while (setMatchedIndex(g, *f, regIndex, end) > 0) {
+        if (isNFlagActivated(*g)) {
+          printf("%d:", f->numLineInFile);
+        }
+        for (int i = start; i < end; i++) {
+          printf("%c", f->lineFromFile[i]);
+        }
+        printf("\n");
+        start = g->matchedIndexes[0];
+        end = g->matchedIndexes[1];
+      }
+    }
+  }
+
+  // printf("%s", myFile.lineFromFile);
 }
 
 void fillFlags(Grep* src, int argCount, char** argVector) {
@@ -103,7 +164,7 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
           } else if (!(isSFlagActivated(*src))) {
             printf("%s: Empty file\n", reg);
           }
-          closeFile(myFile);
+          closeFile(&myFile);
         }
         break;
       case 'i':
@@ -134,7 +195,11 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
         printf("!!!\n");
     }
   }
+
+  if (isVFlagActivated(*src) && isOFlagActivated(*src))
+    deactivateFlag(src, O_FLAG_ACTIVATED);
 }
+
 int addAndCompileRegex(Grep* src, char* reg, int options) {
   int res = 1;
   pcre* compiledReg = getCompiledRegex(reg, options);
@@ -177,3 +242,7 @@ int isHFlagActivated(Grep g) { return g.flags & H_FLAG_ACTIVATED; }
 int isSFlagActivated(Grep g) { return g.flags & S_FLAG_ACTIVATED; }
 int isFFlagActivated(Grep g) { return g.flags & F_FLAG_ACTIVATED; }
 int isOFlagActivated(Grep g) { return g.flags & O_FLAG_ACTIVATED; }
+
+void deactivateFlag(Grep* g, int flagActivatedValue) {
+  g->flags &= ~flagActivatedValue;
+}

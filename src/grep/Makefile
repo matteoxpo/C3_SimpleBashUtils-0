@@ -16,7 +16,7 @@ OBJECTS = $(SOURCE:.c=.o)
 
 
 
-EXECUTABLE = grep
+EXECUTABLE = s21_grep
 
 .PHONY: s21_grep
 s21_grep: all

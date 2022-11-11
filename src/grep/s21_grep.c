@@ -19,39 +19,60 @@ int main(int argc, char** argv) {
 void grep(int argCount, char** argVector) {
   Grep myGrep = initGrep(argCount, argVector);
   FilesData myFilesData = initFilesData(argCount, argVector);
-  if (!isEFlagActivated(myGrep)) findAndSetPattern(&myGrep, &myFilesData);
+  if (!isEFlagActivated(myGrep)) {
+    findAndSetPattern(&myGrep, &myFilesData);
+    delPatternFromFiles(&myFilesData);
+    deactivateFlag(&myGrep, E_FLAG_ACTIVATED);
+  }
 
   while (!isAllFilesDone(myFilesData)) {
     File myFile =
         initFile(myFilesData.currentFileName, isSFlagActivated(myGrep));
-
     if (!openFile(&myFile, !isSFlagActivated(myGrep))) {
       doStepToNextFile(&myFilesData);
       continue;
     }
-    // l --> c --> v --> o
-    // h s
-
+    int matchedCount = 0;
+    int matchedL = 0;
     while (readLineFromFile(&myFile)) {
-      int isMatched = 0;
-      int matchedCount = 0;
       for (int i = 0; i < myGrep.regExCount; i++) {
-        isMatched = setMatchedIndex(&myGrep, myFile, i, 0);
-        // if (isMatched == REG_INDEX_ERROR) exit(0);  // AAaAAAaAaaaaAaaaAAA
-
+        //
+        int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
+        //
         if (isMatched && !isVFlagActivated(myGrep)) {
-          ActIfVFlagNonActivated(&myGrep, &myFilesData, &myFile, i);
+          //
+          if (isLFlagActivated(myGrep)) matchedL = 1;
+          //
+          if (isOFlagActivated(myGrep))
+            printSubExpressions(&myGrep, &myFile, i);
           matchedCount++;
+
+          // if (isNFlagActivated(myGrep))
         } else if (!isMatched && isVFlagActivated(myGrep)) {
           // something else lol
+          matchedCount++;
         }
 
-        if (isCFlagActivated(myGrep)) {
-          printf("%d", matchedCount);
+        if (!isLFlagActivated(myGrep) && !isLFlagActivated(myGrep) &&
+            !isOFlagActivated(myGrep) && !isCFlagActivated(myGrep) &&
+            isMatched) {
+          printFileName(myFilesData, isHFlagActivated(myGrep));
+          myFile.lineFromFile[strlen(myFile.lineFromFile) - 1] == '\n'
+              ? printf("%s", myFile.lineFromFile)
+              : printf("%s\n", myFile.lineFromFile);
         }
       }
       resetLineFromfile(&myFile);
     }
+    if (matchedCount != 0 && !isLFlagActivated(myGrep) &&
+        isCFlagActivated(myGrep)) {
+      printFileName(myFilesData, isHFlagActivated(myGrep));
+      printf("%d\n", matchedCount);
+    }
+    if (matchedL) {
+      printf("%s\n", myFile.fileName);
+    }
+
     resetFile(&myFile);
     doStepToNextFile(&myFilesData);
   }
@@ -90,51 +111,43 @@ void findAndSetPattern(Grep* src, FilesData* data) {
   doStepToNextFile(data);
 }
 
-void ActIfVFlagNonActivated(Grep* g, FilesData* d, File* f, int regIndex) {
-  if (isLFlagActivated(*g)) {
-    printf("%s\n", f->fileName);
-    return;
+void printSubExpressions(Grep* g, File* f, int regIndex) {
+  int start = g->matchedIndexes[0];
+  int end = g->matchedIndexes[1];
+  while (start != end) {
+    printSubStr(start, end, f->lineFromFile, isNFlagActivated(*g),
+                isOFlagActivated(*g), *f);
+    setMatchedIndex(g, *f, regIndex, end);
+    start = g->matchedIndexes[0];
+    end = g->matchedIndexes[1];
   }
-  if (isCFlagActivated(*g)) {
-    if (d->filesCount > 1) printf("%s\n", f->fileName);
-    return;
-  }
-
-  if (isOFlagActivated(*g)) {
-    int start = g->matchedIndexes[0];
-    int end = g->matchedIndexes[1];
-    if (start != end) {
-      if (isNFlagActivated(*g)) {
-        printf("%d:", f->numLineInFile);
-      }
-      for (int i = start; i < end; i++) {
-        printf("%c", f->lineFromFile[i]);
-      }
-      printf("\n");
-      while (setMatchedIndex(g, *f, regIndex, end) > 0) {
-        if (isNFlagActivated(*g)) {
-          printf("%d:", f->numLineInFile);
-        }
-        for (int i = start; i < end; i++) {
-          printf("%c", f->lineFromFile[i]);
-        }
-        printf("\n");
-        start = g->matchedIndexes[0];
-        end = g->matchedIndexes[1];
-      }
-    }
-  }
-
-  // printf("%s", myFile.lineFromFile);
 }
 
-void printStr(int start, int end, char* str, int isNAcivated) {}
+void printFileName(FilesData data, int isHActivaed) {
+  if (data.filesCount > 1 && !isHActivaed)
+    printf("%s:", data.fileNames[data.currentFileIndex]);
+}
+
+void printSubStr(int start, int end, char* str, int isNAcivated,
+                 int isOActivated, File f) {
+  if (isOActivated) {
+    printf("%s:", f.fileName);
+  }
+  if (isNAcivated) {
+    printf("%d:", f.numLineInFile);
+  }
+
+  for (int i = start; i < end; i++) {
+    printf("%c", str[i]);
+  }
+  printf("\n");
+}
 
 void fillFlags(Grep* src, int argCount, char** argVector) {
   int opt;
   src->regOptions = 0;
-  while ((opt = getopt_long(argCount, argVector, "e:ivclnsf:o?", NULL, NULL)) !=
-         -1) {
+  while ((opt = getopt_long(argCount, argVector, "e:ivclnshf:o?", NULL,
+                            NULL)) != -1) {
     switch (opt) {
       case 'i':
         src->flags |= I_FLAG_ACTIVATED;
@@ -148,8 +161,8 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
     }
   }
   optind = 1;
-  while ((opt = getopt_long(argCount, argVector, "e:ivclnsf:o?", NULL, NULL)) !=
-         -1) {
+  while ((opt = getopt_long(argCount, argVector, "e:ivclnshf:o?", NULL,
+                            NULL)) != -1) {
     switch (opt) {
       case 'e':
         src->flags |= E_FLAG_ACTIVATED;
@@ -244,6 +257,18 @@ int isHFlagActivated(Grep g) { return g.flags & H_FLAG_ACTIVATED; }
 int isSFlagActivated(Grep g) { return g.flags & S_FLAG_ACTIVATED; }
 int isFFlagActivated(Grep g) { return g.flags & F_FLAG_ACTIVATED; }
 int isOFlagActivated(Grep g) { return g.flags & O_FLAG_ACTIVATED; }
+
+void delPatternFromFiles(FilesData* data) {
+  if (data->fileNames[0] != NULL) {
+    free(data->fileNames[0]);
+    for (int i = 0; i < data->filesCount - 1; i++)
+      data->fileNames[i] = data->fileNames[i + 1];
+
+    data->filesCount--;
+    data->currentFileName = data->fileNames[0];
+    data->currentFileIndex = 0;
+  }
+}
 
 void deactivateFlag(Grep* g, int flagActivatedValue) {
   g->flags &= ~flagActivatedValue;

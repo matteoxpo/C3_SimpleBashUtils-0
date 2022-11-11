@@ -6,16 +6,16 @@
 #include "file.h"
 #include "filesData.h"
 
-#define E_FLAG_ACTIVATED 0b0000000001
-#define I_FLAG_ACTIVATED 0b0000000010
+#define E_FLAG_ACTIVATED 0b0000000001  // yes
+#define I_FLAG_ACTIVATED 0b0000000010  // yes
 #define V_FLAG_ACTIVATED 0b0000000100
-#define C_FLAG_ACTIVATED 0b0000001000
-#define L_FLAG_ACTIVATED 0b0000010000
-#define N_FLAG_ACTIVATED 0b0000100000
+#define C_FLAG_ACTIVATED 0b0000001000  // yes(partly)
+#define L_FLAG_ACTIVATED 0b0000010000  // partly
+#define N_FLAG_ACTIVATED 0b0000100000  // partly
 #define H_FLAG_ACTIVATED 0b0001000000
 #define S_FLAG_ACTIVATED 0b0010000000
 #define F_FLAG_ACTIVATED 0b0100000000
-#define O_FLAG_ACTIVATED 0b1000000000
+#define O_FLAG_ACTIVATED 0b1000000000  // partly
 
 #define MATCHED_INDEX_ARR_SIZE 3
 #define REG_INDEX_ERROR -21
@@ -39,9 +39,12 @@ pcre* getCompiledRegex(char*, int);
 int addCompiledRegex(Grep*, pcre*);
 int setMatchedIndex(Grep*, File, int index, int start);
 
-void ActIfVFlagNonActivated(Grep* g, FilesData* d, File* f, int regIndex);
+void printSubExpressions(Grep* g, File* f, int regIndex);
 
-void printStr(int start, int end, char* str, int isNAcivated);
+void printSubStr(int start, int end, char* str, int isNAcivated,
+                 int isOActivated, File f);
+void printFileName(FilesData data, int isHActivaed);
+void delPatternFromFiles(FilesData* data);
 
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);

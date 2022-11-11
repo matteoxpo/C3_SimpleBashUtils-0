@@ -128,6 +128,8 @@ void ActIfVFlagNonActivated(Grep* g, FilesData* d, File* f, int regIndex) {
   // printf("%s", myFile.lineFromFile);
 }
 
+void printStr(int start, int end, char* str, int isNAcivated) {}
+
 void fillFlags(Grep* src, int argCount, char** argVector) {
   int opt;
   src->regOptions = 0;

@@ -41,6 +41,8 @@ int setMatchedIndex(Grep*, File, int index, int start);
 
 void ActIfVFlagNonActivated(Grep* g, FilesData* d, File* f, int regIndex);
 
+void printStr(int start, int end, char* str, int isNAcivated);
+
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);
 int isVFlagActivated(Grep);

@@ -19,21 +19,10 @@ void grep(int argCount, char** argVector) {
   Grep myGrep = initGrep(argCount, argVector);
   FilesData myFilesData = initFilesData(argCount, argVector);
 
-  printf("filesCount == %d currentFileName == %s\n", myFilesData.filesCount,
-         myFilesData.currentFileName);
-  printf("RegEXCount == %d flags == %zu\n", myGrep.regExCount, myGrep.flags);
-
-  //
-
-  //
-
   if ((!isEFlagActivated(myGrep))) {
     addAndCompileRegex(&myGrep, myFilesData.currentFileName, myGrep.regOptions);
     doStepToNextFile(&myFilesData);
   }
-  //
-
-  //
   while (!isAllFilesDone(myFilesData)) {
     File myFile =
         initFile(myFilesData.currentFileName, isSFlagActivated(myGrep));
@@ -60,10 +49,6 @@ void grep(int argCount, char** argVector) {
     closeFile(myFile);
     doStepToNextFile(&myFilesData);
   }
-  //
-
-  //
-
   destroyGrep(&myGrep);
   myFilesData.del(&myFilesData);
 }

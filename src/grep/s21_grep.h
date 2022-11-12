@@ -31,6 +31,8 @@ typedef struct s_Grep {
 } Grep;
 void grep(int, char**);
 Grep initGrep(int, char**);
+void setOptions(Grep* src, int argCount, char** argVector);
+
 void destroyGrep(Grep*);
 void findAndSetPattern(Grep* src, FilesData* data);
 void fillFlags(Grep*, int, char**);
@@ -41,10 +43,11 @@ int setMatchedIndex(Grep*, File, int index, int start);
 
 void printSubExpressions(Grep* g, File* f, int regIndex);
 
-void printSubStr(int start, int end, char* str, int isNAcivated,
-                 int isOActivated, File f);
+void printSubStr(int start, int end, char* str, int isOActivated,
+                 int isHavticated, File f);
 void printFileName(FilesData data, int isHActivaed);
 void delPatternFromFiles(FilesData* data);
+void setRegFromFile(Grep* src, char* fileName);
 
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);

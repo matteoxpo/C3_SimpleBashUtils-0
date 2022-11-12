@@ -23,7 +23,7 @@ s21_grep: all
 
 .PHONY: all
 all: $(OBJECTS)
-	$(CC) $(LIBFLAGS) $(INCLUDES) $(OBJECTS) -o $(EXECUTABLE)
+	$(CC) $(INCLUDES) $(OBJECTS) -o $(EXECUTABLE) $(LIBFLAGS) 
 
 .PHONY: re
 re: rebuild
@@ -32,7 +32,7 @@ re: rebuild
 rebuild: clean all
 
 %.o: %.c
-	$(CC) $(LIBFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
+	$(CC)  $(INCLUDES) $(CFLAGS) $< -o $@ $(LIBFLAGS)
 
 .PHONY: clean
 clean:

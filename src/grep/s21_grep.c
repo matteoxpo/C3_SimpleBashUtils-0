@@ -22,7 +22,6 @@ void grep(int argCount, char** argVector) {
   if (!isEFlagActivated(myGrep)) {
     findAndSetPattern(&myGrep, &myFilesData);
     delPatternFromFiles(&myFilesData);
-    deactivateFlag(&myGrep, E_FLAG_ACTIVATED);
   }
 
   while (!isAllFilesDone(myFilesData)) {
@@ -34,19 +33,32 @@ void grep(int argCount, char** argVector) {
     }
     int matchedCount = 0;
     int matchedL = 0;
+    // int matchedN = 0;
     while (readLineFromFile(&myFile)) {
       for (int i = 0; i < myGrep.regExCount; i++) {
         //
         int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
         //
+
         if (isMatched && !isVFlagActivated(myGrep)) {
+          if (myFile.fileName[0] == 'M') printf("%s", myFile.lineFromFile);
+
           //
           if (isLFlagActivated(myGrep)) matchedL = 1;
+          // if (isNFlagActivated(myGrep)) matchedN = 1;
           //
-          if (isOFlagActivated(myGrep))
-            printSubExpressions(&myGrep, &myFile, i);
-          matchedCount++;
 
+          if (!isCFlagActivated(myGrep)) {
+            if (isNFlagActivated(myGrep)) {
+              printf("%d:", myFile.numLineInFile);
+            }
+            if (isOFlagActivated(myGrep)) {
+              // if (myFile.fileName[0] == 'M')
+              //   printf("%s\n", myFile.lineFromFile);
+              printSubExpressions(&myGrep, &myFile, i);
+            }
+            matchedCount++;
+          }
           // if (isNFlagActivated(myGrep))
         } else if (!isMatched && isVFlagActivated(myGrep)) {
           // something else lol
@@ -64,11 +76,11 @@ void grep(int argCount, char** argVector) {
       }
       resetLineFromfile(&myFile);
     }
-    if (matchedCount != 0 && !isLFlagActivated(myGrep) &&
-        isCFlagActivated(myGrep)) {
+    if (!isLFlagActivated(myGrep) && isCFlagActivated(myGrep)) {
       printFileName(myFilesData, isHFlagActivated(myGrep));
       printf("%d\n", matchedCount);
     }
+
     if (matchedL) {
       printf("%s\n", myFile.fileName);
     }
@@ -99,10 +111,12 @@ void destroyGrep(Grep* src) {
 
 int setMatchedIndex(Grep* src, File f, int index, int start) {
   int res = REG_INDEX_ERROR;
+
   if (index > -1 && index < src->regExCount)
     res = pcre_exec(src->regEx[index], NULL, f.lineFromFile,
                     strlen(f.lineFromFile), start, 0, src->matchedIndexes,
                     MATCHED_INDEX_ARR_SIZE);
+
   return res;
 }
 
@@ -114,12 +128,14 @@ void findAndSetPattern(Grep* src, FilesData* data) {
 void printSubExpressions(Grep* g, File* f, int regIndex) {
   int start = g->matchedIndexes[0];
   int end = g->matchedIndexes[1];
-  while (start != end) {
-    printSubStr(start, end, f->lineFromFile, isNFlagActivated(*g),
-                isOFlagActivated(*g), *f);
+  while (start != -1 && end != -1) {
+    printSubStr(start, end, f->lineFromFile, isOFlagActivated(*g),
+                isHFlagActivated(*g), *f);
     setMatchedIndex(g, *f, regIndex, end);
+
     start = g->matchedIndexes[0];
     end = g->matchedIndexes[1];
+    printf("\n");
   }
 }
 
@@ -128,38 +144,21 @@ void printFileName(FilesData data, int isHActivaed) {
     printf("%s:", data.fileNames[data.currentFileIndex]);
 }
 
-void printSubStr(int start, int end, char* str, int isNAcivated,
-                 int isOActivated, File f) {
-  if (isOActivated) {
+void printSubStr(int start, int end, char* str, int isOActivated,
+                 int isHavticated, File f) {
+  if (isOActivated && !isHavticated) {
     printf("%s:", f.fileName);
-  }
-  if (isNAcivated) {
-    printf("%d:", f.numLineInFile);
   }
 
   for (int i = start; i < end; i++) {
     printf("%c", str[i]);
   }
-  printf("\n");
 }
 
 void fillFlags(Grep* src, int argCount, char** argVector) {
+  setOptions(src, argCount, argVector);
+
   int opt;
-  src->regOptions = 0;
-  while ((opt = getopt_long(argCount, argVector, "e:ivclnshf:o?", NULL,
-                            NULL)) != -1) {
-    switch (opt) {
-      case 'i':
-        src->flags |= I_FLAG_ACTIVATED;
-        src->regOptions |= PCRE_CASELESS;
-        break;
-      case 's':
-        src->flags |= S_FLAG_ACTIVATED;
-        break;
-      case '?':
-        printf("!!!\n");
-    }
-  }
   optind = 1;
   while ((opt = getopt_long(argCount, argVector, "e:ivclnshf:o?", NULL,
                             NULL)) != -1) {
@@ -170,17 +169,7 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
         break;
       case 'f':
         src->flags |= F_FLAG_ACTIVATED;
-        File myFile = initFile(optarg, !isSFlagActivated(*src));
-        if (isFileOpened(myFile)) {
-          char* reg = getFirstWordFromFile(myFile);
-          if (reg != NULL) {
-            addAndCompileRegex(src, reg, src->regOptions);
-            free(reg);
-          } else if (!(isSFlagActivated(*src))) {
-            printf("%s: Empty file\n", reg);
-          }
-          closeFile(&myFile);
-        }
+        setRegFromFile(src, optarg);
         break;
       case 'i':
         src->flags |= I_FLAG_ACTIVATED;
@@ -272,4 +261,39 @@ void delPatternFromFiles(FilesData* data) {
 
 void deactivateFlag(Grep* g, int flagActivatedValue) {
   g->flags &= ~flagActivatedValue;
+}
+
+void setOptions(Grep* src, int argCount, char** argVector) {
+  int opt = 0;
+  src->regOptions = 0;
+  while ((opt = getopt_long(argCount, argVector, "e:ivclnshf:o?", NULL,
+                            NULL)) != -1) {
+    switch (opt) {
+      case 'i':
+        src->flags |= I_FLAG_ACTIVATED;
+        src->regOptions |= PCRE_CASELESS;
+        break;
+      case 's':
+        src->flags |= S_FLAG_ACTIVATED;
+        break;
+      case '?':
+        printf("!!!\n");
+    }
+  }
+}
+
+void setRegFromFile(Grep* src, char* fileName) {
+  File myFile = initFile(fileName, !isSFlagActivated(*src));
+  if (isFileOpened(myFile)) {
+    char* reg = fileName;
+    size_t lineSize = 0;
+    while (getline(&reg, &lineSize, myFile.fileStream) > 0) {
+      if (reg == NULL) break;
+      if (reg[0] == '\n') continue;
+      addAndCompileRegex(src, reg, src->regOptions);
+      free(reg);
+      reg = NULL;
+    }
+  }
+  closeFile(&myFile);
 }

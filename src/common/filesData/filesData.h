@@ -4,15 +4,13 @@
 #include <getopt.h>
 #include <stdio.h>
 
-#include "flags.h"
+#define CURRENTFILEINDEXERROR 3
 
 typedef struct s_FilesData {
-  Flags flags;
-
-  unsigned int filesCount;
+  int filesCount;
   char** fileNames;
 
-  unsigned int currentFileIndex;
+  int currentFileIndex;
   char* currentFileName;
 
   void (*del)(struct s_FilesData* self);
@@ -22,6 +20,8 @@ FilesData initFilesData(int argc, char** argv);
 void destroyFilesData(FilesData* data);
 
 int isAllFilesDone(FilesData data);
-void doStepToNextFile(FilesData* data);
+int doStepToNextFile(FilesData* data);
+
+void printFilesData(FilesData d);
 
 #endif  // SRC_CAT_FILESDATA_FILESDATA_H_

@@ -29,16 +29,18 @@ void cat(int argc, char **argv) {
     while (readingSymbolFromFile(&myFile)) {
       if (isSFlagActivated(flags) && isLastTwoLineEmpty(myFile)) continue;
 
-      if (isBFlagActivated(flags) && isCurrLineEmpty(myFile))
+      if (isBFlagActivated(flags)) {
+        if (isCurrLineNotEmpty(myFile))
+          fprintf(stdout, "%*d\t", 6, lineNumber++);
+      } else if (isNFlagActivated(flags) && isNewLine(myFile)) {
         fprintf(stdout, "%*d\t", 6, lineNumber++);
-      else if (isNFlagActivated(flags) && isNewLine(myFile))
-        fprintf(stdout, "%*d\t", 6, lineNumber++);
+      }
 
       if (isEFlagActivated(flags) && isCurrSymbolEntry(myFile))
         fprintf(stdout, "$");
 
       if (isTFlagActivated(flags) && isCurSymEqTab(myFile)) {
-        fprintf(stdout, "^|");
+        fprintf(stdout, "^I");
         continue;
       }
 
@@ -48,8 +50,13 @@ void cat(int argc, char **argv) {
         fprintf(stdout, "%c", myFile.currentSymbol);
     }
 
-    doStepToNextFile(&myFilesData);
-    closeFile(myFile);
+    closeFile(&myFile);
+    if (doStepToNextFile(&myFilesData) == CURRENTFILEINDEXERROR) {
+      if (isAllFilesDone(myFilesData))
+        fprintf(stderr, "cat: %s: No such file or directory\n",
+                myFilesData.currentFileName);
+      break;
+    }
   }
   myFilesData.del(&myFilesData);
 }

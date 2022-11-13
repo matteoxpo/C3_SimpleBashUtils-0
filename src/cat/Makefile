@@ -15,7 +15,7 @@ OBJECTS = $(SOURCE:.c=.o)
 
 
 
-EXECUTABLE = cat
+EXECUTABLE = s21_cat
 
 .PHONY: s21_cat
 s21_cat: all
@@ -31,7 +31,7 @@ re: rebuild
 rebuild: clean all
 
 %.o: %.c
-	$(CC) $(INCLUDES) $(CFLAGS) $< -o $@
+	$(CC) $(LIBFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@
 
 .PHONY: clean
 clean:

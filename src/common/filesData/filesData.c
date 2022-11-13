@@ -7,8 +7,6 @@
 FilesData initFilesData(int argCount, char** argVector) {
   FilesData myFilesData;
 
-  myFilesData.flags = getFlags(argCount, argVector);
-
   myFilesData.currentFileIndex = 0;
   int index = optind;
   int count = argCount - index;
@@ -21,7 +19,7 @@ FilesData initFilesData(int argCount, char** argVector) {
   }
   if (count > 0) myFilesData.currentFileName = myFilesData.fileNames[0];
   myFilesData.del = destroyFilesData;
-
+  // printFilesData(myFilesData);
   return myFilesData;
 }
 
@@ -37,9 +35,18 @@ void destroyFilesData(FilesData* data) {
   }
 }
 
-void doStepToNextFile(FilesData* data) {
+int doStepToNextFile(FilesData* data) {
+  int res = 1;
   data->currentFileIndex++;
+  if (data->currentFileIndex > data->filesCount) res = CURRENTFILEINDEXERROR;
   if (!isAllFilesDone(*data)) {
     data->currentFileName = data->fileNames[data->currentFileIndex];
+  }
+  return res;
+}
+
+void printFilesData(FilesData d) {
+  for (int i = 0; i < d.filesCount; i++) {
+    printf("file #%d -- %s\n", i + 1, d.fileNames[i]);
   }
 }

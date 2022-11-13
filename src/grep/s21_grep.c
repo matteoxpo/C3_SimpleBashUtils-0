@@ -35,17 +35,37 @@ void grep(int argCount, char** argVector) {
     int matchedCount = 0;
     int matchedL = 0;
     int breakFlag = 0;
-
+    int isMathedInLine = 0;
+    int isMathedInV = 0;
     while (readLineFromFile(&myFile)) {
       for (int i = 0; i < myGrep.regExCount && !breakFlag; i++) {
         int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
 
-        // printf("curr file name == %s\n", myFile.fileName);
-        if (isMatched && isVFlagActivated(myGrep)) {
+        int matchedIndexesV[3];
+
+        isMathedInV += pcre_exec(myGrep.regEx[i], NULL, myFile.lineFromFile,
+                                 strlen(myFile.lineFromFile), 0, 0,
+                                 matchedIndexesV, MATCHED_INDEX_ARR_SIZE);
+
+        for (int j = 0; j < myGrep.regExCount; j++) {
+          int start = matchedIndexesV[0];
+          int end = matchedIndexesV[1];
+          while (start != -1 && end != -1) {
+            isMathedInV += pcre_exec(myGrep.regEx[j], NULL, myFile.lineFromFile,
+                                     strlen(myFile.lineFromFile), end, 0,
+                                     matchedIndexesV, MATCHED_INDEX_ARR_SIZE);
+
+            start = matchedIndexesV[0];
+            end = matchedIndexesV[1];
+          }
+        }
+
+        if (isCFlagActivated(myGrep) && isVFlagActivated(myGrep) && isMatched) {
           if (isLFlagActivated(myGrep)) matchedL = 0;
           breakFlag = 1 && isLFlagActivated(myGrep);
           break;
         }
+
         if ((isMatched && !isVFlagActivated(myGrep)) ||
             (!isMatched && isVFlagActivated(myGrep))) {
           if (!isCFlagActivated(myGrep)) {
@@ -58,11 +78,16 @@ void grep(int argCount, char** argVector) {
             }
           }
 
-          if (printMatchedline(myGrep, myFile, myFilesData)) break;
-          matchedCount++;
+          if ((isVFlagActivated(myGrep) && (isMathedInV > 0)) ||
+              !isVFlagActivated(myGrep))
+            if (printMatchedline(myGrep, myFile, myFilesData)) break;
+          if (!isMathedInLine) {
+            matchedCount++;
+            isMathedInLine = 1;
+          }
         }
       }
-
+      isMathedInLine = 0;
       resetLineFromfile(&myFile);
     }
     if (!isLFlagActivated(myGrep) && isCFlagActivated(myGrep)) {
@@ -129,8 +154,7 @@ void printSubExpressions(Grep* g, File* f, FilesData d, int regIndex) {
 
 int printMatchedline(Grep g, File f, FilesData d) {
   int res = 0;
-  if (!isLFlagActivated(g) && !isLFlagActivated(g) && !isOFlagActivated(g) &&
-      !isCFlagActivated(g)) {
+  if (!isLFlagActivated(g) && !isOFlagActivated(g) && !isCFlagActivated(g)) {
     printFileName(d, isHFlagActivated(g));
     f.lineFromFile[strlen(f.lineFromFile) - 1] == '\n'
         ? printf("%s", f.lineFromFile)
@@ -286,7 +310,9 @@ void setRegFromFile(Grep* src, char* fileName) {
     while (getline(&reg, &lineSize, myFile.fileStream) > 0) {
       if (reg == NULL) break;
       if (reg[0] == '\n') continue;
-      if (reg[strlen(reg) - 1] == '\n') reg[strlen(reg) - 1] = '\0';
+      if (reg[strlen(reg) - 1] == '\n' || reg[strlen(reg) - 1] == EOF)
+        reg[strlen(reg) - 1] = '\0';
+
       addAndCompileRegex(src, reg, src->regOptions);
       free(reg);
       reg = NULL;

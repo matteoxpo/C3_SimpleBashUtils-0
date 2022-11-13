@@ -19,8 +19,6 @@
 
 #define MATCHED_INDEX_ARR_SIZE 3
 #define REG_INDEX_ERROR -21
-#define MATCHED 1
-#define DIDNT_MATCHED 0
 
 typedef struct s_Grep {
   pcre** regEx;
@@ -41,13 +39,13 @@ pcre* getCompiledRegex(char*, int);
 int addCompiledRegex(Grep*, pcre*);
 int setMatchedIndex(Grep*, File, int index, int start);
 
-void printSubExpressions(Grep* g, File* f, int regIndex);
+void printSubExpressions(Grep* g, File* f, FilesData d, int regIndex);
+void printSubStr(int start, int end, char* str, Grep g, FilesData d, File f);
 
-void printSubStr(int start, int end, char* str, int isOActivated,
-                 int isHavticated, File f);
 void printFileName(FilesData data, int isHActivaed);
 void delPatternFromFiles(FilesData* data);
 void setRegFromFile(Grep* src, char* fileName);
+int printMatchedline(Grep g, File f, FilesData d);
 
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);

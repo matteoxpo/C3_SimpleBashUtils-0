@@ -98,6 +98,7 @@ char* getWordFromFile(File f) {
     } else {
     }
   }
+
   return reg;
 }
 
@@ -110,6 +111,10 @@ void resetLineFromfile(File* f) {
 
 int readLineFromFile(File* f) {
   f->numLineInFile++;
-  return (getline(&(f->lineFromFile), &(f->sizeOfAllocedMemOfLine),
-                  f->fileStream) != -1);
+  int res = -1;
+  if (f->fileStream != NULL)
+    res = (getline(&(f->lineFromFile), &(f->sizeOfAllocedMemOfLine),
+                   f->fileStream) != -1);
+
+  return res;
 }

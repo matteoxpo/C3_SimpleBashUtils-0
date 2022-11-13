@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "_types.h": "c",
+        "stdlib.h": "c",
+        "pcre.h": "c",
+        "flags.h": "c",
+        "filesdata.h": "c",
+        "stdio.h": "c",
+        "file.h": "c",
+        "getopt.h": "c"
+    }
+}

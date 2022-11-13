@@ -46,18 +46,18 @@ declare -a extra=(
 
 testing()
 {
-    t=$(echo $@ | sed "s/VAR/$var/")
+    t=$(echo -e $@ | sed "s/VAR/$var/")
     leaks -quiet -atExit -- ./s21_grep $t > test_s21_grep.log
     leak=$(grep -A100000 leaks test_s21_grep.log)
     (( COUNTER++ ))
     if [[ $leak == *"0 leaks for 0 total leaked bytes"* ]]
     then
       (( SUCCESS++ ))
-        echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
+        echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"
     else
       (( FAIL++ ))
-        echo "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
-#        echo "$leak"
+        echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[31mfail\033[0m grep $t"
+#        echo -e "$leak"
     fi
     rm test_s21_grep.log
 }
@@ -149,6 +149,6 @@ do
     done
 done
 
-echo "\033[31mFAIL: $FAIL\033[0m"
-echo "\033[32mSUCCESS: $SUCCESS\033[0m"
-echo "ALL: $COUNTER"
+echo -e "\033[31mFAIL: $FAIL\033[0m"
+echo -e "\033[32mSUCCESS: $SUCCESS\033[0m"
+echo -e "ALL: $COUNTER"

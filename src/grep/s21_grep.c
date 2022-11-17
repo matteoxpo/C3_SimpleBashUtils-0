@@ -35,12 +35,13 @@ void grep(int argCount, char** argVector) {
     int matchedCount = 0;
     int matchedL = 0;
     int isMathedInLine = 0;
+    int isMatchedThisTime = 0;
     while (readLineFromFile(&myFile)) {
+      isMathedInLine = isMatchedOnceInLine(myGrep, myFile) > 0;
+      // printf("%d --- \n", isMathedInLine);
+
       for (int i = 0; i < myGrep.regExCount; i++) {
         int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
-
-        isMathedInLine = isMatchedOnceInLine(myGrep, myFile) > 0;
-        // printf("matched == %d\n", isMathedInLine);
 
         if ((isMatched && !isVFlagActivated(myGrep)) ||
             (!isMathedInLine && isVFlagActivated(myGrep))) {
@@ -48,23 +49,23 @@ void grep(int argCount, char** argVector) {
           if (isLFlagActivated(myGrep)) matchedL = 1;
           //
           if (!isCFlagActivated(myGrep)) {
-            if (isNFlagActivated(myGrep) && !isOFlagActivated(myGrep) &&
-                !isLFlagActivated(myGrep)) {
-            }
-            //
-            if (isOFlagActivated(myGrep) && !isLFlagActivated(myGrep)) {
+            if (isOFlagActivated(myGrep) && !isLFlagActivated(myGrep) &&
+                !isVFlagActivated(myGrep)) {
               printSubExpressions(&myGrep, &myFile, myFilesData, i);
             }
           }
-
-          if (!isVFlagActivated(myGrep) || (isVFlagActivated(myGrep)))
+          if (!isOFlagActivated(myGrep)) {
             if (printMatchedline(myGrep, myFile, myFilesData)) {
               break;
             }
-          matchedCount++;
+          }
+          if (!isMatchedThisTime) {
+            matchedCount++;
+            isMatchedThisTime = 1;
+          }
         }
       }
-
+      isMatchedThisTime = 0;
       resetLineFromfile(&myFile);
     }
 
@@ -72,11 +73,6 @@ void grep(int argCount, char** argVector) {
       printFileName(myFilesData, isHFlagActivated(myGrep));
       printf("%d\n", matchedCount);
     }
-
-    if (isNFlagActivated(myGrep))
-      if (!isVFlagActivated(myGrep) ||
-          (isVFlagActivated(myGrep) && (isMathedInLine)))
-        printf("%d:", myFile.numLineInFile);
 
     if (matchedL) {
       printf("%s\n", myFile.fileName);
@@ -136,31 +132,35 @@ void printSubExpressions(Grep* g, File* f, FilesData d, int regIndex) {
 }
 int isMatchedOnceInLine(Grep g, File f) {
   int matchedIndexesV[MATCHED_INDEX_ARR_SIZE];
+  int isMatched = -1;
+  matchedIndexesV[1] = 0;
+  // int index = -1;
+  // int steps = 0;
 
-  int isMatched =
-      pcre_exec(g.regEx[0], NULL, f.lineFromFile, strlen(f.lineFromFile), 0, 0,
-                matchedIndexesV, MATCHED_INDEX_ARR_SIZE);
-
-  for (int j = 0; j < g.regExCount; j++) {
+  for (int i = 0; i < g.regExCount; i++) {
     int start = matchedIndexesV[0];
     int end = matchedIndexesV[1];
-    while (start != -1 && end != -1) {
-      if (isMatched > 0) break;
+
+    while (isMatched < 0 && (start != -1 && end != -1)) {
       isMatched =
-          pcre_exec(g.regEx[j], NULL, f.lineFromFile, strlen(f.lineFromFile),
+          pcre_exec(g.regEx[i], NULL, f.lineFromFile, strlen(f.lineFromFile),
                     end, 0, matchedIndexesV, MATCHED_INDEX_ARR_SIZE);
 
       start = matchedIndexesV[0];
       end = matchedIndexesV[1];
     }
+    if (isMatched > 0) break;
   }
+
   return isMatched;
 }
 
 int printMatchedline(Grep g, File f, FilesData d) {
   int res = 0;
+
   if (!isLFlagActivated(g) && !isLFlagActivated(g) && !isOFlagActivated(g) &&
       !isCFlagActivated(g)) {
+    if (isNFlagActivated(g)) printf("%d:", f.numLineInFile);
     printFileName(d, isHFlagActivated(g));
     f.lineFromFile[strlen(f.lineFromFile) - 1] == '\n'
         ? printf("%s", f.lineFromFile)
@@ -226,8 +226,8 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
     }
   }
 
-  if (isVFlagActivated(*src) && isOFlagActivated(*src))
-    deactivateFlag(src, O_FLAG_ACTIVATED);
+  // if (isVFlagActivated(*src) && isOFlagActivated(*src))
+  //   deactivateFlag(src, O_FLAG_ACTIVATED);
 }
 
 int addAndCompileRegex(Grep* src, char* reg, int options) {
@@ -316,7 +316,8 @@ void setRegFromFile(Grep* src, char* fileName) {
     while (getline(&reg, &lineSize, myFile.fileStream) > 0) {
       if (reg == NULL) break;
       if (reg[0] == '\n') continue;
-      if (reg[strlen(reg) - 1] == '\n') reg[strlen(reg) - 1] = '\0';
+      if (reg[strlen(reg) - 1] == '\n' || reg[strlen(reg) - 1] == EOF)
+        reg[strlen(reg) - 1] = '\0';
       addAndCompileRegex(src, reg, src->regOptions);
       free(reg);
       reg = NULL;

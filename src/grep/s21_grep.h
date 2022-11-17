@@ -47,6 +47,7 @@ void delPatternFromFiles(FilesData* data);
 void setRegFromFile(Grep* src, char* fileName);
 int printMatchedline(Grep g, File f, FilesData d);
 int isMatchedOnceInLine(Grep g, File f);
+
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);
 int isVFlagActivated(Grep);

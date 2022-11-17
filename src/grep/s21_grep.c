@@ -30,6 +30,7 @@ void grep(int argCount, char** argVector) {
         initFile(myFilesData.currentFileName, isSFlagActivated(myGrep));
     if (!openFile(&myFile, !isSFlagActivated(myGrep))) {
       doStepToNextFile(&myFilesData);
+      resetFile(&myFile);
       continue;
     }
     int matchedCount = 0;
@@ -38,16 +39,13 @@ void grep(int argCount, char** argVector) {
     int isMatchedThisTime = 0;
     while (readLineFromFile(&myFile)) {
       isMathedInLine = isMatchedOnceInLine(myGrep, myFile) > 0;
-      // printf("%d --- \n", isMathedInLine);
-
+      //
       for (int i = 0; i < myGrep.regExCount; i++) {
+        //
         int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
-
         if ((isMatched && !isVFlagActivated(myGrep)) ||
             (!isMathedInLine && isVFlagActivated(myGrep))) {
-          //
           if (isLFlagActivated(myGrep)) matchedL = 1;
-          //
           if (!isCFlagActivated(myGrep)) {
             if (isOFlagActivated(myGrep) && !isLFlagActivated(myGrep) &&
                 !isVFlagActivated(myGrep)) {
@@ -134,8 +132,7 @@ int isMatchedOnceInLine(Grep g, File f) {
   int matchedIndexesV[MATCHED_INDEX_ARR_SIZE];
   int isMatched = -1;
   matchedIndexesV[1] = 0;
-  // int index = -1;
-  // int steps = 0;
+  matchedIndexesV[0] = 0;
 
   for (int i = 0; i < g.regExCount; i++) {
     int start = matchedIndexesV[0];
@@ -160,8 +157,9 @@ int printMatchedline(Grep g, File f, FilesData d) {
 
   if (!isLFlagActivated(g) && !isLFlagActivated(g) && !isOFlagActivated(g) &&
       !isCFlagActivated(g)) {
-    if (isNFlagActivated(g)) printf("%d:", f.numLineInFile);
     printFileName(d, isHFlagActivated(g));
+    if (isNFlagActivated(g)) printf("%d:", f.numLineInFile);
+
     f.lineFromFile[strlen(f.lineFromFile) - 1] == '\n'
         ? printf("%s", f.lineFromFile)
         : printf("%s\n", f.lineFromFile);
@@ -243,7 +241,6 @@ pcre* getCompiledRegex(char* reg, int options) {
   const char* error = NULL;
   int erroffset;
   regCompiled = pcre_compile(reg, options, &error, &erroffset, NULL);
-  // ! add error check
   return regCompiled;
 }
 

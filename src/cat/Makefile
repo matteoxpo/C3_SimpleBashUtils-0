@@ -1,4 +1,4 @@
-.PHONY: all, clean, rebuild, s21_cat , re
+.PHONY: all, clean, rebuild, s21_cat , re, mac_tests, gnu_tests
 
 CC =gcc
 
@@ -29,6 +29,18 @@ re: rebuild
 
 .PHONY: rebuild
 rebuild: clean all
+
+.PHONY: mac_tests
+mac_tests:
+	./test_func_cat.sh
+	./test_leak_cat_mac.sh
+
+.PHONY: gnu_tests
+gnu_tests:
+	./test_func_cat.sh
+	./test_leak_cat_gnu.sh
+	
+
 
 %.o: %.c
 	$(CC) $(LIBFLAGS) $(INCLUDES) $(CFLAGS) $< -o $@

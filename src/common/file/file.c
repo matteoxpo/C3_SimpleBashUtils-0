@@ -7,6 +7,7 @@
 File initFile(char* fName, int mode) {
   File newFile;
 
+  newFile.fileStream = NULL;
   newFile.currentSymbol = '\n';
   newFile.pervSymbol = 0;
   newFile.prevPervSymbol = 0;
@@ -24,6 +25,8 @@ File initFile(char* fName, int mode) {
 
 int openFile(File* f, int mode) {
   int res = 1;
+  if (f->fileStream != NULL) resetFile(f);
+
   f->fileStream = fopen(f->fileName, "rb");
   if (f->fileStream == NULL) {
     if (mode)

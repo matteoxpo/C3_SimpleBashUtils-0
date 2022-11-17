@@ -28,7 +28,7 @@ declare -a extra=(
 testing()
 {
     t=$(echo -e $@ | sed "s/VAR/$var/")
-    leaks -quiet -atExit -- ./s21_cat $t > test_s21_cat.log
+    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./s21_cat $t > test_s21_cat.log
     leak=$(grep -A100000 leaks test_s21_cat.log)
     (( COUNTER++ ))
     if [[ $leak == *"0 leaks for 0 total leaked bytes"* ]]

@@ -33,6 +33,8 @@ re: rebuild
 .PHONY: rebuild
 rebuild: clean all
 
+
+
 .PHONY: mac_tests
 mac_tests:
 	./test_func_grep.sh

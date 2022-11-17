@@ -135,8 +135,8 @@ int isMatchedOnceInLine(Grep g, File f) {
   matchedIndexesV[0] = 0;
 
   for (int i = 0; i < g.regExCount; i++) {
-    int start = matchedIndexesV[0];
-    int end = matchedIndexesV[1];
+    int start = 0;
+    int end = 0;
 
     while (isMatched < 0 && (start != -1 && end != -1)) {
       isMatched =

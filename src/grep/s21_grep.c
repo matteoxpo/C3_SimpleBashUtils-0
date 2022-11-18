@@ -229,9 +229,12 @@ void fillFlags(Grep* src, int argCount, char** argVector) {
 
 int addAndCompileRegex(Grep* src, char* reg, int options) {
   int res = 1;
-  pcre* compiledReg = getCompiledRegex(reg, options);
-  if (compiledReg == NULL || addCompiledRegex(src, compiledReg)) res = 0;
-
+  if (reg != NULL && src != NULL) {
+    pcre* compiledReg = getCompiledRegex(reg, options);
+    if (compiledReg == NULL || addCompiledRegex(src, compiledReg)) res = 0;
+  } else {
+    res = 0;
+  }
   return res;
 }
 
@@ -239,7 +242,8 @@ pcre* getCompiledRegex(char* reg, int options) {
   pcre* regCompiled = NULL;
   const char* error = NULL;
   int erroffset;
-  regCompiled = pcre_compile(reg, options, &error, &erroffset, NULL);
+  if (reg != NULL)
+    regCompiled = pcre_compile(reg, options, &error, &erroffset, NULL);
   return regCompiled;
 }
 
@@ -270,14 +274,17 @@ int isFFlagActivated(Grep g) { return g.flags & F_FLAG_ACTIVATED; }
 int isOFlagActivated(Grep g) { return g.flags & O_FLAG_ACTIVATED; }
 
 void delPatternFromFiles(FilesData* data) {
-  if (data->fileNames[0] != NULL) {
-    free(data->fileNames[0]);
-    for (int i = 0; i < data->filesCount - 1; i++)
-      data->fileNames[i] = data->fileNames[i + 1];
+  if (data != NULL && data->fileNames != NULL &&
+      data->currentFileName != NULL) {
+    if (data->fileNames[0] != NULL) {
+      free(data->fileNames[0]);
+      for (int i = 0; i < data->filesCount - 1; i++)
+        data->fileNames[i] = data->fileNames[i + 1];
 
-    data->filesCount--;
-    data->currentFileName = data->fileNames[0];
-    data->currentFileIndex = 0;
+      data->filesCount--;
+      data->currentFileName = data->fileNames[0];
+      data->currentFileIndex = 0;
+    }
   }
 }
 
@@ -307,7 +314,7 @@ void setOptions(Grep* src, int argCount, char** argVector) {
 void setRegFromFile(Grep* src, char* fileName) {
   File myFile = initFile(fileName, !isSFlagActivated(*src));
   if (isFileOpened(myFile)) {
-    char* reg = fileName;
+    char* reg = NULL;
     size_t lineSize = 0;
     while (getline(&reg, &lineSize, myFile.fileStream) > 0) {
       if (reg == NULL) break;
@@ -318,6 +325,7 @@ void setRegFromFile(Grep* src, char* fileName) {
       free(reg);
       reg = NULL;
     }
+    if (reg != NULL) free(reg);
   }
   closeFile(&myFile);
 }

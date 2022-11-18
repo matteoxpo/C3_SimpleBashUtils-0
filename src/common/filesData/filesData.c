@@ -11,13 +11,17 @@ FilesData initFilesData(int argCount, char** argVector) {
   int index = optind;
   int count = argCount - index;
   myFilesData.filesCount = count;
-
-  myFilesData.fileNames = (char**)calloc(count, sizeof(char*));
-  for (int i = 0; i < count; i++) {
-    myFilesData.fileNames[i] = strdup(argVector[index]);
-    index++;
+  if (argCount > 1) {
+    myFilesData.fileNames = (char**)calloc(count, sizeof(char*));
+    for (int i = 0; i < count; i++) {
+      myFilesData.fileNames[i] = strdup(argVector[index]);
+      index++;
+    }
+    if (count > 0) myFilesData.currentFileName = myFilesData.fileNames[0];
+  } else {
+    myFilesData.fileNames = NULL;
+    myFilesData.currentFileName = NULL;
   }
-  if (count > 0) myFilesData.currentFileName = myFilesData.fileNames[0];
   myFilesData.del = destroyFilesData;
   // printFilesData(myFilesData);
   return myFilesData;

@@ -31,12 +31,16 @@ re: rebuild
 rebuild: clean all
 
 .PHONY: mac_tests
-mac_tests:
+mac_tests: s21_cat
+	chmod +x test_func_cat.sh
+	chmod +x test_leak_cat_mac.sh
 	./test_func_cat.sh
 	./test_leak_cat_mac.sh
 
 .PHONY: gnu_tests
-gnu_tests:
+gnu_tests: s21_cat
+	chmod +x test_func_cat.sh
+	chmod +x test_leak_cat_gnu.sh
 	./test_func_cat.sh
 	./test_leak_cat_gnu.sh
 	

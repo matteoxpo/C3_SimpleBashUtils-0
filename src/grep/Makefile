@@ -1,4 +1,4 @@
-.PHONY: all, clean, rebuild, s21_cat , re, mac_tests, gnu_tests
+.PHONY: all, clean, rebuild, s21_grep , re, mac_tests, gnu_tests
 
 CC =gcc
 
@@ -22,7 +22,6 @@ EXECUTABLE = s21_grep
 s21_grep: all
 
 .PHONY: all
-
 all: $(OBJECTS)
 	$(CC) $(INCLUDES) $(OBJECTS) -o $(EXECUTABLE) $(LIBFLAGS) 
 
@@ -36,12 +35,16 @@ rebuild: clean all
 
 
 .PHONY: mac_tests
-mac_tests:
+mac_tests: s21_grep
+	chmod +x test_func_grep.sh
+	chmod +x test_leak_grep_mac.sh
 	./test_func_grep.sh
 	./test_leak_grep_mac.sh
 
 .PHONY: gnu_tests
-gnu_tests:
+gnu_tests: s21_grep
+	chmod +x test_func_grep.sh
+	chmod +x test_leak_grep_gnu.sh
 	./test_func_grep.sh
 	./test_leak_grep_gnu.sh
 

@@ -28,10 +28,10 @@ declare -a extra=(
 testing()
 {
     t=$(echo -e $@ | sed "s/VAR/$var/")
-    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./s21_cat $t > test_s21_cat.log
-    leak=$(grep -A100000 leaks test_s21_cat.log)
+    valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./s21_cat $t &> test_s21_cat.log
+    leak=$(grep -A100000 ERROR SUMMARY:  test_s21_cat.log)
     (( COUNTER++ ))
-    if [[ $leak == *"0 leaks for 0 total leaked bytes"* ]]
+    if [[ $leak == *"ERROR SUMMARY: 0 errors"* ]]
     then
       (( SUCCESS++ ))
         echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m cat $t"

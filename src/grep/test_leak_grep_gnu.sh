@@ -50,7 +50,7 @@ testing()
     valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./s21_grep $t > test_s21_grep.log
     leak=$(grep -A100000 leaks test_s21_grep.log)
     (( COUNTER++ ))
-    if [[ $leak == *"0 leaks for 0 total leaked bytes"* ]]
+    if [[ $leak == *"0 errors from 0 contexts (suppressed: 0 from 0)"* ]]
     then
       (( SUCCESS++ ))
         echo -e "\033[31m$FAIL\033[0m/\033[32m$SUCCESS\033[0m/$COUNTER \033[32msuccess\033[0m grep $t"

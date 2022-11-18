@@ -33,49 +33,32 @@ void grep(int argCount, char** argVector) {
       resetFile(&myFile);
       continue;
     }
-    int matchedCount = 0;
-    int matchedL = 0;
-    int isMathedInLine = 0;
-    int isMatchedThisTime = 0;
     while (readLineFromFile(&myFile)) {
-      isMathedInLine = isMatchedOnceInLine(myGrep, myFile) > 0;
-      //
+      int isMathedInLine = isMatchedOnceInLine(myGrep, myFile) > 0;
       for (int i = 0; i < myGrep.regExCount; i++) {
-        //
         int isMatched = setMatchedIndex(&myGrep, myFile, i, 0) > 0;
         if ((isMatched && !isVFlagActivated(myGrep)) ||
             (!isMathedInLine && isVFlagActivated(myGrep))) {
-          if (isLFlagActivated(myGrep)) matchedL = 1;
-          if (!isCFlagActivated(myGrep)) {
-            if (isOFlagActivated(myGrep) && !isLFlagActivated(myGrep) &&
-                !isVFlagActivated(myGrep)) {
-              printSubExpressions(&myGrep, &myFile, myFilesData, i);
-            }
-          }
-          if (!isOFlagActivated(myGrep)) {
-            if (printMatchedline(myGrep, myFile, myFilesData)) {
-              break;
-            }
-          }
-          if (!isMatchedThisTime) {
-            matchedCount++;
-            isMatchedThisTime = 1;
-          }
+          if (isOFlagActivated(myGrep))
+            printSubExpressions(&myGrep, &myFile, myFilesData, i);
+          else if (printMatchedline(myGrep, myFile, myFilesData))
+            break;
+          countMatch(&myGrep);
         }
       }
-      isMatchedThisTime = 0;
+      myGrep.isThisLineCounted = 0;
       resetLineFromfile(&myFile);
     }
 
     if (!isLFlagActivated(myGrep) && isCFlagActivated(myGrep)) {
       printFileName(myFilesData, isHFlagActivated(myGrep));
-      printf("%d\n", matchedCount);
+      printf("%d\n", myGrep.countedMatches);
     }
 
-    if (matchedL) {
+    if (isLFlagActivated(myGrep) && myGrep.countedMatches > 0)
       printf("%s\n", myFile.fileName);
-    }
 
+    resetCounter(&myGrep);
     resetFile(&myFile);
     doStepToNextFile(&myFilesData);
   }
@@ -85,6 +68,8 @@ void grep(int argCount, char** argVector) {
 
 Grep initGrep(int argCount, char** argVector) {
   Grep newGrep;
+  newGrep.countedMatches = 0;
+  newGrep.isThisLineCounted = 0;
   newGrep.matchedIndexes[0] = newGrep.matchedIndexes[1] =
       newGrep.matchedIndexes[2] = -1;
   newGrep.regEx = malloc(sizeof(pcre*));
@@ -92,6 +77,18 @@ Grep initGrep(int argCount, char** argVector) {
   fillFlags((&newGrep), argCount, argVector);
 
   return newGrep;
+}
+
+void countMatch(Grep* g) {
+  if (!(g->isThisLineCounted)) {
+    g->countedMatches++;
+    g->isThisLineCounted = 1;
+  }
+}
+
+void resetCounter(Grep* g) {
+  g->countedMatches = 0;
+  g->isThisLineCounted = 0;
 }
 
 void destroyGrep(Grep* src) {
@@ -117,6 +114,8 @@ void findAndSetPattern(Grep* src, FilesData* data) {
 }
 
 void printSubExpressions(Grep* g, File* f, FilesData d, int regIndex) {
+  if (isLFlagActivated(*g) || isVFlagActivated(*g) || isCFlagActivated(*g))
+    return;
   int start = g->matchedIndexes[0];
   int end = g->matchedIndexes[1];
   while (start != -1 && end != -1) {

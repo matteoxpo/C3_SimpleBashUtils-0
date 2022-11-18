@@ -26,6 +26,8 @@ typedef struct s_Grep {
   size_t flags;
   int regOptions;
   int matchedIndexes[MATCHED_INDEX_ARR_SIZE];
+  int countedMatches;
+  int isThisLineCounted;
 } Grep;
 void grep(int, char**);
 Grep initGrep(int, char**);
@@ -47,6 +49,9 @@ void delPatternFromFiles(FilesData* data);
 void setRegFromFile(Grep* src, char* fileName);
 int printMatchedline(Grep g, File f, FilesData d);
 int isMatchedOnceInLine(Grep g, File f);
+
+void countMatch(Grep* g);
+void resetCounter(Grep* g);
 
 int isEFlagActivated(Grep);
 int isIFlagActivated(Grep);
